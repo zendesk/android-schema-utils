@@ -642,7 +642,7 @@ public class Schemas {
 
   public void upgrade(int fromVersion, Context context, SQLiteDatabase database) {
     int currentVersion = getCurrentRevisionNumber();
-    for (int version = fromVersion; version < currentVersion; version++) {
+    for (int version = fromVersion + 1; version <= currentVersion; version++) {
       for (Migration migration : to(version)) {
         migration.apply(version, database, this, context);
       }
