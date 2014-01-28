@@ -106,6 +106,10 @@ mvn clean package
 ```
 in directory with pom.xml.
 
+minSdkVersion = 10
+------------------
+Android schema utils are compatible with Android 2.3 and newer.
+
 Todo
 ----
 * Documentation
