@@ -68,6 +68,14 @@ public class SchemaBuilderTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectDowngradesWithNotDescendingOffsets() throws Exception {
+    Schemas.Builder
+        .currentSchema(2900)
+        .downgradeTo(1500)
+        .downgradeTo(1600);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
   public void shouldRejectDuplicateColumnsInCurrentSchema() throws Exception {
     new Schemas.TableDefinition("Deals",
         new Schemas.AddColumn("ID", ""),
