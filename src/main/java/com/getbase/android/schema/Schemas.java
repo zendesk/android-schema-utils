@@ -51,7 +51,7 @@ public class Schemas {
             @Override
             public ImmutableMap<String, ImmutableList<TableDefinitionOperation>> load(Integer key) throws Exception {
               Integer lastMergedRevision = Collections.min(mRevisions.asMap().keySet());
-              Preconditions.checkState(lastMergedRevision > key);
+              Preconditions.checkState(lastMergedRevision > key, "Trying to retrieve version %s, which is higher than current schema version", key);
               ImmutableMap<String, ImmutableList<TableDefinitionOperation>> schema = mRevisions.getIfPresent(lastMergedRevision);
               Preconditions.checkState(schema != null);
 
