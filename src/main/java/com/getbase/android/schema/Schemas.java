@@ -57,7 +57,7 @@ public class Schemas {
 
               for (int revision = lastMergedRevision - 1; ; --revision) {
                 if (mDowngrades.containsKey(revision)) {
-                  schema = merge(schema, mDowngrades.get(revision));
+                  schema = merge(schema, mDowngrades.get(revision), revision);
                 }
 
                 if (revision == key) {
@@ -72,7 +72,8 @@ public class Schemas {
 
   private ImmutableMap<String, ImmutableList<TableDefinitionOperation>> merge(
       ImmutableMap<String, ImmutableList<TableDefinitionOperation>> schema,
-      ImmutableMap<String, ImmutableList<TableDowngradeOperation>> downgrades) {
+      ImmutableMap<String, ImmutableList<TableDowngradeOperation>> downgrades,
+      int targetRevision) {
     ImmutableMap.Builder<String, ImmutableList<TableDefinitionOperation>> builder = ImmutableMap.builder();
 
     for (String unchangedTable : Sets.difference(schema.keySet(), downgrades.keySet())) {
@@ -80,7 +81,7 @@ public class Schemas {
     }
 
     for (String alteredTable : Sets.intersection(downgrades.keySet(), schema.keySet())) {
-      ImmutableList<TableDefinitionOperation> mergedOperations = MERGER.merge(schema.get(alteredTable), downgrades.get(alteredTable));
+      ImmutableList<TableDefinitionOperation> mergedOperations = MERGER.merge(schema.get(alteredTable), downgrades.get(alteredTable), alteredTable, targetRevision);
       if (!mergedOperations.isEmpty()) {
         builder.put(alteredTable, mergedOperations);
       }
@@ -138,9 +139,13 @@ public class Schemas {
   private static final TableOperationMerger MERGER = new TableOperationMerger();
 
   private static class TableOperationMerger implements TableOperationVisitor {
+    private String mTable;
+    private int mTargetRevision;
     private Map<TableOperationId, TableDefinitionOperation> mMergedOperations;
 
-    public ImmutableList<TableDefinitionOperation> merge(ImmutableList<TableDefinitionOperation> schema, ImmutableList<TableDowngradeOperation> downgrades) {
+    public ImmutableList<TableDefinitionOperation> merge(ImmutableList<TableDefinitionOperation> schema, ImmutableList<TableDowngradeOperation> downgrades, String table, int targetRevision) {
+      mTable = table;
+      mTargetRevision = targetRevision;
       mMergedOperations = Maps.newHashMap();
 
       for (TableOperation operation : schema) {
@@ -161,7 +166,12 @@ public class Schemas {
 
     @Override
     public void visit(DropColumn dropColumn) {
-      Preconditions.checkState(mMergedOperations.remove(dropColumn.getId()) != null);
+      TableDefinitionOperation droppedColumn = mMergedOperations.remove(dropColumn.getId());
+      Preconditions.checkState(
+          droppedColumn != null,
+          "Trying to drop non existing column %s.%s while building schema version %s",
+          mTable, dropColumn.mColumnName, mTargetRevision
+      );
     }
 
     @Override
@@ -171,7 +181,12 @@ public class Schemas {
 
     @Override
     public void visit(DropConstraint dropConstraint) {
-      Preconditions.checkState(mMergedOperations.remove(dropConstraint.getId()) != null);
+      TableDefinitionOperation droppedConstraint = mMergedOperations.remove(dropConstraint.getId());
+      Preconditions.checkState(
+          droppedConstraint != null,
+          "Trying to drop non existing constraint '%s' on table %s while building schema version %s",
+          dropConstraint.mConstraintDefinition, mTable, mTargetRevision
+      );
     }
 
     @Override
