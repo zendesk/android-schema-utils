@@ -88,7 +88,7 @@ public class Schemas {
     }
 
     for (String addedTable : Sets.difference(downgrades.keySet(), schema.keySet())) {
-      builder.put(addedTable, CONVERTER.convert(downgrades.get(addedTable)));
+      builder.put(addedTable, CONVERTER.convert(downgrades.get(addedTable), addedTable, targetRevision));
     }
 
     return builder.build();
@@ -99,8 +99,12 @@ public class Schemas {
   private static class DowngradeToDefinitionConverter implements TableOperationVisitor {
 
     private ImmutableList.Builder<TableDefinitionOperation> builder;
+    private String mTable;
+    private int mTargetRevision;
 
-    public ImmutableList<TableDefinitionOperation> convert(ImmutableList<TableDowngradeOperation> downgrades) {
+    public ImmutableList<TableDefinitionOperation> convert(ImmutableList<TableDowngradeOperation> downgrades, String table, int targetRevision) {
+      mTable = table;
+      mTargetRevision = targetRevision;
       builder = ImmutableList.builder();
 
       for (TableDowngradeOperation downgrade : downgrades) {
@@ -122,7 +126,7 @@ public class Schemas {
 
     @Override
     public void visit(DropTable dropTable) {
-      throw new IllegalStateException();
+      throw new IllegalStateException("Trying to drop non existing table " + mTable + " while building schema version " + mTargetRevision);
     }
 
     @Override

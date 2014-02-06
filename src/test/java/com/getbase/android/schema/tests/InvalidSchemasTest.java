@@ -51,6 +51,22 @@ public class InvalidSchemasTest {
   }
 
   @Test
+  public void shouldRejectDroppingNonExistingTable() throws Exception {
+    expectedException.expectCause(is(CoreMatchers.<IllegalStateException>instanceOf(IllegalStateException.class)));
+
+    Schemas db = Schemas.Builder
+        .currentSchema(2900)
+        .downgradeTo(1500,
+            new Schemas.TableDowngrade("Deals",
+                new Schemas.DropTable()
+            )
+        )
+        .build();
+
+    db.getSchema(1000);
+  }
+
+  @Test
   public void shouldRejectDroppingNonExistingColumn() throws Exception {
     expectedException.expectCause(is(CoreMatchers.<IllegalStateException>instanceOf(IllegalStateException.class)));
 
