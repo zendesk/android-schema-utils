@@ -1,12 +1,16 @@
 package com.getbase.android.schema.tests;
 
 import static com.getbase.android.schema.Migrations.auto;
+import static org.hamcrest.CoreMatchers.is;
 
 import com.getbase.android.schema.Migration;
 import com.getbase.android.schema.Schemas;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
@@ -15,6 +19,9 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(reportSdk = 10, manifest = Config.NONE)
 public class InvalidSchemasTest {
+
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   @Before
   public void setUp() throws Exception {
@@ -43,8 +50,10 @@ public class InvalidSchemasTest {
     db.getSchema(1000).getCreateTableStatement("Deals");
   }
 
-  @Test(expected = Throwable.class)
+  @Test
   public void shouldRejectDroppingNonExistingColumn() throws Exception {
+    expectedException.expectCause(is(CoreMatchers.<IllegalStateException>instanceOf(IllegalStateException.class)));
+
     Schemas db = Schemas.Builder
         .currentSchema(2900,
             new Schemas.TableDefinition("Deals",
@@ -57,8 +66,10 @@ public class InvalidSchemasTest {
     db.getSchema(1000);
   }
 
-  @Test(expected = Throwable.class)
+  @Test
   public void shouldRejectDroppingNonExistingConstraint() throws Exception {
+    expectedException.expectCause(is(CoreMatchers.<IllegalStateException>instanceOf(IllegalStateException.class)));
+
     Schemas db = Schemas.Builder
         .currentSchema(2900,
             new Schemas.TableDefinition("Deals",
