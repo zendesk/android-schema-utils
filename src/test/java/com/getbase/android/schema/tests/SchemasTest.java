@@ -4,6 +4,8 @@ import static org.fest.assertions.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 
 import com.getbase.android.schema.Schemas;
+import com.getbase.android.schema.Schemas.DropTable;
+import com.getbase.android.schema.Schemas.TableDowngrade;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
@@ -54,4 +56,5 @@ public class SchemasTest {
 
     db.getSchema(2900);
   }
+
 }

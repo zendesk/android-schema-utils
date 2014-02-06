@@ -2,6 +2,7 @@ package com.getbase.android.schema.tests;
 
 import static org.fest.assertions.Assertions.assertThat;
 
+import com.getbase.android.schema.Migration;
 import com.getbase.android.schema.Schemas;
 import com.google.common.collect.ImmutableList;
 
@@ -12,11 +13,21 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+
 import java.util.List;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(reportSdk = 10, manifest = Config.NONE)
 public class SchemaBuilderTest {
+
+  public static final Migration EMPTY_MIGRATION = new Migration() {
+    @Override
+    public void apply(int version, SQLiteDatabase database, Schemas schemas, Context context) {
+
+    }
+  };
 
   @Before
   public void setUp() throws Exception {
@@ -162,5 +173,35 @@ public class SchemaBuilderTest {
     }
 
     assertThat(count).isEqualTo(operations.size());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectDowngradeWithOffsetHigherThanLastUpgrade() throws Exception {
+    Schemas.Builder
+        .currentSchema(2900)
+        .upgradeTo(1500, EMPTY_MIGRATION)
+        .downgradeTo(1600, new Schemas.TableDowngrade("Deals",
+            new Schemas.AddColumn("ID", "")
+        ));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectUpgradeWithOffsetHigherThanLastDowngrade() throws Exception {
+    Schemas.Builder
+        .currentSchema(2900)
+        .downgradeTo(1500, new Schemas.TableDowngrade("Deals",
+            new Schemas.AddColumn("ID", "")
+        ))
+        .upgradeTo(1600, EMPTY_MIGRATION);
+  }
+
+  @Test
+  public void shouldAllowUpgradeWithTheSameOffsetAsTheLastDowngrade() throws Exception {
+    Schemas.Builder
+        .currentSchema(2900)
+        .downgradeTo(1500, new Schemas.TableDowngrade("Deals",
+            new Schemas.AddColumn("ID", "")
+        ))
+        .upgradeTo(1500, EMPTY_MIGRATION);
   }
 }

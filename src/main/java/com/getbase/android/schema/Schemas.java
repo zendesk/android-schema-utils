@@ -554,6 +554,9 @@ public class Schemas {
     private final ImmutableMap.Builder<Integer, ImmutableMap<String, ImmutableList<TableDowngradeOperation>>> mDowngradesBuilder = ImmutableMap.builder();
     private final ImmutableMap.Builder<Integer, Migration[]> mMigrationsBuilder = ImmutableMap.builder();
 
+    private Integer mCurrentOffset;
+    private boolean mUpgradeToCurrentOffsetDefined;
+
     private Release mCurrentRelease;
     private final Map<Integer, ImmutableMap<String, ImmutableList<TableDowngradeOperation>>> mPendingDowngrades = Maps.newHashMap();
     private final Map<Integer, Migration[]> mPendingMigrations = Maps.newHashMap();
@@ -564,6 +567,8 @@ public class Schemas {
       }
 
       mCurrentRevisionOffset = offset;
+      mCurrentOffset = offset;
+      mUpgradeToCurrentOffsetDefined = false;
     }
 
     public static OldSchemasBuilder currentSchema(int revision, TableDefinition... tables) {
@@ -573,17 +578,10 @@ public class Schemas {
     public class OldSchemasBuilder {
       public OldSchemasBuilder downgradeTo(int offset, TableDowngrade... tableDowngrades) {
         Preconditions.checkArgument(
-            mCurrentRelease != null || offset < mCurrentRevisionOffset,
-            "downgrade offset (%s) should be lower than current revision offset (%s)",
-            offset, mCurrentRevisionOffset
+            mCurrentOffset == null || offset < mCurrentOffset,
+            "Downgrades and upgrades definitions should have descending offsets. The downgrade offset (%s) should be lower than current offset (%s)",
+            offset, mCurrentOffset
         );
-        if (!mPendingDowngrades.isEmpty()) {
-          Preconditions.checkArgument(
-              offset < Collections.max(mPendingDowngrades.keySet()),
-              "Downgrades definitions should have descending offsets. The downgrade offset (%s) is higher or equal to current maximum (%s)",
-              offset, Collections.max(mPendingDowngrades.keySet())
-          );
-        }
 
         Map<String, ImmutableList<TableDowngradeOperation>> downgrades = Maps.newHashMap();
         for (TableDowngrade tableDowngrade : tableDowngrades) {
@@ -594,6 +592,8 @@ public class Schemas {
         }
 
         mPendingDowngrades.put(offset, ImmutableMap.copyOf(downgrades));
+        mCurrentOffset = offset;
+        mUpgradeToCurrentOffsetDefined = false;
 
         return this;
       }
@@ -610,8 +610,23 @@ public class Schemas {
                 .size() <= 1,
             "only one auto() migration per upgrade is allowed"
         );
+        if (mCurrentOffset != null) {
+          if (mUpgradeToCurrentOffsetDefined) {
+            Preconditions.checkArgument(offset < mCurrentOffset,
+                "Downgrades and upgrades definitions should have descending offsets. The upgrade to %s is already defined, so upgrade offset %s should be lower than %s",
+                mCurrentOffset, offset, mCurrentOffset
+            );
+          } else {
+            Preconditions.checkArgument(offset <= mCurrentOffset,
+                "Downgrades and upgrades definitions should have descending offsets. The upgrade offset %s should be lower or equal to %s",
+                offset, mCurrentOffset
+            );
+          }
+        }
 
         mPendingMigrations.put(offset, migrations);
+        mUpgradeToCurrentOffsetDefined = (mCurrentOffset == null || offset == mCurrentOffset);
+        mCurrentOffset = offset;
         return this;
       }
 
@@ -620,6 +635,9 @@ public class Schemas {
           mCurrentRelease = release;
         }
         processPendingSchemaParts(release.getSchemaVersion());
+
+        mCurrentOffset = null;
+        mUpgradeToCurrentOffsetDefined = false;
 
         return this;
       }
