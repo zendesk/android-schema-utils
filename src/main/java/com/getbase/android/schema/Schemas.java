@@ -161,7 +161,7 @@ public class Schemas {
 
     @Override
     public void visit(DropColumn dropColumn) {
-      Preconditions.checkArgument(mMergedOperations.remove(dropColumn.getId()) != null);
+      Preconditions.checkState(mMergedOperations.remove(dropColumn.getId()) != null);
     }
 
     @Override
@@ -171,7 +171,7 @@ public class Schemas {
 
     @Override
     public void visit(DropConstraint dropConstraint) {
-      Preconditions.checkArgument(mMergedOperations.remove(dropConstraint.getId()) != null);
+      Preconditions.checkState(mMergedOperations.remove(dropConstraint.getId()) != null);
     }
 
     @Override
