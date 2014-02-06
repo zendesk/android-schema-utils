@@ -27,8 +27,8 @@ public class SchemaBuilderTest {
   public void shouldRejectDuplicateTablesInCurrentSchema() throws Exception {
     Schemas.Builder
         .currentSchema(1500,
-            new Schemas.TableDefinition("Deals"),
-            new Schemas.TableDefinition("Deals"));
+            new Schemas.TableDefinition("Deals", new Schemas.AddColumn("ID", "")),
+            new Schemas.TableDefinition("Deals", new Schemas.AddColumn("ID", "")));
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -36,8 +36,13 @@ public class SchemaBuilderTest {
     Schemas.Builder
         .currentSchema(2900)
         .downgradeTo(1500,
-            new Schemas.TableDowngrade("Deals"),
-            new Schemas.TableDowngrade("Deals"));
+            new Schemas.TableDowngrade("Deals",
+                new Schemas.AddColumn("ID", "")
+            ),
+            new Schemas.TableDowngrade("Deals",
+                new Schemas.AddColumn("ID", "")
+            )
+        );
   }
 
   @Test(expected = IllegalArgumentException.class)
