@@ -54,7 +54,7 @@ public class InvalidSchemasTest {
                 new Schemas.DropColumn("wat?")))
         .build();
 
-    db.getSchema(1000).getCreateTableStatement("Deals");
+    db.getSchema(1000);
   }
 
   @Test(expected = Throwable.class)
@@ -68,7 +68,7 @@ public class InvalidSchemasTest {
                 new Schemas.DropConstraint("wat?")))
         .build();
 
-    db.getSchema(1000).getCreateTableStatement("Deals");
+    db.getSchema(1000);
   }
 
   @Test(expected = IllegalArgumentException.class)
