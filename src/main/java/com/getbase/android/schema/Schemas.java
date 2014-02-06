@@ -19,11 +19,13 @@ package com.getbase.android.schema;
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicates;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -35,6 +37,7 @@ import com.google.common.collect.Sets.SetView;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -560,6 +563,16 @@ public class Schemas {
       }
 
       public OldSchemasBuilder upgradeTo(int offset, Migration... migrations) {
+        Preconditions.checkArgument(migrations != null);
+        Preconditions.checkArgument(migrations.length > 0);
+        Preconditions.checkArgument(migrations.length == 1 && migrations[0] != AUTO_MIGRATION);
+        Preconditions.checkArgument(migrations.length <= 1 ||
+            FluentIterable
+                .from(Arrays.asList(migrations))
+                .filter(Predicates.equalTo(AUTO_MIGRATION))
+                .size() <= 1
+        );
+
         mPendingMigrations.put(offset, migrations);
         return this;
       }

@@ -1,5 +1,8 @@
 package com.getbase.android.schema.tests;
 
+import static com.getbase.android.schema.Migrations.auto;
+
+import com.getbase.android.schema.Migration;
 import com.getbase.android.schema.Schemas;
 
 import org.junit.Before;
@@ -72,6 +75,38 @@ public class InvalidSchemasTest {
   public void shouldRejectToBuildTableWithoutAnyColumns() throws Exception {
     Schemas.Builder
         .currentSchema(2900, new Schemas.TableDefinition("Deals"))
+        .build();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectUpgradeOnlyWithAutoMigration() throws Exception {
+    Schemas.Builder
+        .currentSchema(2900)
+        .upgradeTo(1500, auto())
+        .build();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectMultipleAutoMigrationsInSingleUpgrade() throws Exception {
+    Schemas.Builder
+        .currentSchema(2900)
+        .upgradeTo(1500, auto(), auto())
+        .build();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectEmptyUpgrade() throws Exception {
+    Schemas.Builder
+        .currentSchema(2900)
+        .upgradeTo(1500)
+        .build();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectUpgradeWithNullMigrationsArray() throws Exception {
+    Schemas.Builder
+        .currentSchema(2900)
+        .upgradeTo(1500, (Migration[]) null)
         .build();
   }
 }
