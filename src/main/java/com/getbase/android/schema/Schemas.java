@@ -205,13 +205,15 @@ public class Schemas {
 
   public class Schema {
     private final ImmutableMap<String, ImmutableList<TableDefinitionOperation>> mTableDefinitions;
+    private final int mVersion;
 
     private Schema(int version) {
+      mVersion = version;
       mTableDefinitions = mRevisions.getUnchecked(version);
     }
 
     public String getCreateTableStatement(String tableName) {
-      Preconditions.checkArgument(mTableDefinitions.containsKey(tableName));
+      Preconditions.checkArgument(mTableDefinitions.containsKey(tableName), "Schema for version %s doesn't contain table %s", mVersion, tableName);
       return new TableCreateStatementBuilder().build(tableName, mTableDefinitions.get(tableName));
     }
 
@@ -546,8 +548,18 @@ public class Schemas {
 
     public class OldSchemasBuilder {
       public OldSchemasBuilder downgradeTo(int offset, TableDowngrade... tableDowngrades) {
-        Preconditions.checkArgument(mCurrentRelease != null || offset < mCurrentRevisionOffset);
-        Preconditions.checkArgument(mPendingDowngrades.isEmpty() || offset < Collections.max(mPendingDowngrades.keySet()));
+        Preconditions.checkArgument(
+            mCurrentRelease != null || offset < mCurrentRevisionOffset,
+            "downgrade offset (%s) should be lower than current revision offset (%s)",
+            offset, mCurrentRevisionOffset
+        );
+        if (!mPendingDowngrades.isEmpty()) {
+          Preconditions.checkArgument(
+              offset < Collections.max(mPendingDowngrades.keySet()),
+              "Downgrades definitions should have descending offsets. The downgrade offset (%s) is higher or equal to current maximum (%s)",
+              offset, Collections.max(mPendingDowngrades.keySet())
+          );
+        }
 
         Map<String, ImmutableList<TableDowngradeOperation>> downgrades = Maps.newHashMap();
         for (TableDowngrade tableDowngrade : tableDowngrades) {
