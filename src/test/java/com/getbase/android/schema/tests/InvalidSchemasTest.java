@@ -13,7 +13,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(reportSdk = 10)
+@Config(reportSdk = 10, manifest = Config.NONE)
 public class InvalidSchemasTest {
 
   @Before

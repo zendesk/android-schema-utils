@@ -15,7 +15,7 @@ import org.robolectric.annotation.Config;
 import java.util.List;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(reportSdk = 10)
+@Config(reportSdk = 10, manifest = Config.NONE)
 public class SchemaBuilderTest {
 
   @Before
