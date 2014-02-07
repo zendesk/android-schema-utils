@@ -12,6 +12,11 @@ public final class TestUtils {
       public int getSchemaVersion() {
         return revision;
       }
+
+      @Override
+      public String toString() {
+        return "Test Release [" + revision + "]";
+      }
     };
   }
 }

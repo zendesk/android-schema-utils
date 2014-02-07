@@ -247,9 +247,72 @@ public class SchemaBuilderTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectDowngradeForVersionEqualToVersionOfTheNextRelease() throws Exception {
+    Schemas.Builder
+        .currentSchema(0)
+        .release(release(1600))
+        .downgradeTo(100, VALID_DOWNGRADE)
+        .release(release(1500));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectDowngradeForVersionEqualToVersionOfTheNextReleaseInInitialSchemaCase() throws Exception {
+    Schemas.Builder
+        .currentSchema(0)
+        .release(release(1500))
+        .downgradeTo(1500, VALID_DOWNGRADE)
+        .build();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectDowngradeForVersionHigherThanVersionOfTheNextRelease() throws Exception {
+    Schemas.Builder
+        .currentSchema(0)
+        .release(release(1600))
+        .downgradeTo(101, VALID_DOWNGRADE)
+        .release(release(1500));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectDowngradeForVersionHigherThanVersionOfTheNextReleaseInInitialSchemaCase() throws Exception {
+    Schemas.Builder
+        .currentSchema(0)
+        .release(release(1500))
+        .downgradeTo(2900, VALID_DOWNGRADE)
+        .build();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
   public void shouldRejectUpgradeWithZeroOffset() throws Exception {
     Schemas.Builder
         .currentSchema(0)
         .upgradeTo(0, EMPTY_MIGRATION);
+  }
+
+  @Test
+  public void shouldAcceptUpgradeForVersionEqualToVersionOfTheNextRelease() throws Exception {
+    Schemas.Builder
+        .currentSchema(0)
+        .release(release(1600))
+        .upgradeTo(100, EMPTY_MIGRATION)
+        .release(release(1500));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectUpgradeForVersionHigherThanVersionOfTheNextRelease() throws Exception {
+    Schemas.Builder
+        .currentSchema(0)
+        .release(release(1600))
+        .upgradeTo(101, EMPTY_MIGRATION)
+        .release(release(1500));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectUpgradeFromInitialSchemaForVersionHigherThanVersionOfTheNextRelease() throws Exception {
+    Schemas.Builder
+        .currentSchema(0)
+        .release(release(1500))
+        .upgradeTo(1600, EMPTY_MIGRATION)
+        .build();
   }
 }

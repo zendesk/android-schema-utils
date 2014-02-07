@@ -644,7 +644,7 @@ public class Schemas {
         if (mCurrentRelease == null) {
           mCurrentRelease = release;
         }
-        processPendingSchemaParts(release.getSchemaVersion());
+        processPendingSchemaParts(release);
 
         mCurrentOffset = null;
         mUpgradeToCurrentOffsetDefined = false;
@@ -655,17 +655,43 @@ public class Schemas {
       }
 
       public Schemas build() {
-        processPendingSchemaParts(0);
+        processPendingSchemaParts(new Release() {
+          @Override
+          public int getSchemaVersion() {
+            return 0;
+          }
+
+          @Override
+          public String toString() {
+            return "INITIAL DB SCHEMA";
+          }
+        });
         return Builder.this.build();
       }
 
-      private void processPendingSchemaParts(int baseRevisionNumber) {
+      private void processPendingSchemaParts(Release release) {
+        int baseRevisionNumber = release.getSchemaVersion();
+
         for (Integer downgradeOffset : mPendingDowngrades.keySet()) {
-          mDowngradesBuilder.put(downgradeOffset + baseRevisionNumber, mPendingDowngrades.get(downgradeOffset));
+          int revisionNumber = downgradeOffset + baseRevisionNumber;
+          if (mLastRelease != null) {
+            Preconditions.checkArgument(revisionNumber < mLastRelease.getSchemaVersion(),
+                "The downgrade with offset %s defined between release %s with version %s and release %s with version %s is outside of valid range [0, %s).",
+                downgradeOffset, release, release.getSchemaVersion(), mLastRelease, mLastRelease.getSchemaVersion(), (mLastRelease.getSchemaVersion() - release.getSchemaVersion())
+            );
+          }
+          mDowngradesBuilder.put(revisionNumber, mPendingDowngrades.get(downgradeOffset));
         }
         mPendingDowngrades.clear();
 
         for (Integer migrationOffset : mPendingMigrations.keySet()) {
+          int revisionNumber = migrationOffset + baseRevisionNumber;
+          if (mLastRelease != null) {
+            Preconditions.checkArgument(revisionNumber <= mLastRelease.getSchemaVersion(),
+                "The upgrade with offset %s defined between release %s with version %s and release %s with version %s is outside of valid range (0, %s].",
+                migrationOffset, release, release.getSchemaVersion(), mLastRelease, mLastRelease.getSchemaVersion(), (mLastRelease.getSchemaVersion() - release.getSchemaVersion())
+            );
+          }
           mMigrationsBuilder.put(migrationOffset + baseRevisionNumber, mPendingMigrations.get(migrationOffset));
         }
         mPendingMigrations.clear();
