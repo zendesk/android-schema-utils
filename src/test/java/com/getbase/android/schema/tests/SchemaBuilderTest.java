@@ -1,11 +1,11 @@
 package com.getbase.android.schema.tests;
 
+import static com.getbase.android.schema.tests.TestUtils.release;
 import static org.fest.assertions.Assertions.assertThat;
 
 import com.getbase.android.schema.Migration;
 import com.getbase.android.schema.Schemas;
 import com.getbase.android.schema.Schemas.AddColumn;
-import com.getbase.android.schema.Schemas.Release;
 import com.getbase.android.schema.Schemas.TableDowngrade;
 import com.google.common.collect.ImmutableList;
 
@@ -35,15 +35,6 @@ public class SchemaBuilderTest {
   public static final TableDowngrade VALID_DOWNGRADE = new TableDowngrade("Deals",
       new AddColumn("ID", "")
   );
-
-  private static Release release(final int revision) {
-    return new Release() {
-      @Override
-      public int getSchemaVersion() {
-        return revision;
-      }
-    };
-  }
 
   @Before
   public void setUp() throws Exception {
