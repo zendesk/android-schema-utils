@@ -265,6 +265,13 @@ public class SchemaBuilderTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectUpgradeWithNegativeOffset() throws Exception {
+    Schemas.Builder
+        .currentSchema(0)
+        .upgradeTo(-1, EMPTY_MIGRATION);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
   public void shouldRejectDowngradeForVersionHigherThanVersionOfTheNextRelease() throws Exception {
     Schemas.Builder
         .currentSchema(0)

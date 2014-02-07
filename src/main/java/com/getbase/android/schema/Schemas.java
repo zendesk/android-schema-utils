@@ -601,7 +601,7 @@ public class Schemas {
       }
 
       public OldSchemasBuilder upgradeTo(int offset, Migration... migrations) {
-        Preconditions.checkArgument(offset > 0, "Cannot define upgrade with 0 offset");
+        Preconditions.checkArgument(offset > 0, "Upgrade offset should be greater than 0");
         Preconditions.checkArgument(migrations != null, "migrations cannot be null");
         Preconditions.checkArgument(migrations.length > 0, "migrations cannot be empty");
         Preconditions.checkArgument(migrations.length == 1 && migrations[0] != AUTO_MIGRATION,
