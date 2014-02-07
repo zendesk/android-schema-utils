@@ -79,6 +79,14 @@ public class SchemaBuilderTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectDuplicateUpgrades() throws Exception {
+    Schemas.Builder
+        .currentSchema(2900)
+        .upgradeTo(1500, EMPTY_MIGRATION)
+        .upgradeTo(1500, EMPTY_MIGRATION);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
   public void shouldRejectDowngradesWithNotDescendingOffsets() throws Exception {
     Schemas.Builder
         .currentSchema(2900)

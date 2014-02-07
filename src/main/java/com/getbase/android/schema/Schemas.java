@@ -625,7 +625,7 @@ public class Schemas {
         }
 
         mPendingMigrations.put(offset, migrations);
-        mUpgradeToCurrentOffsetDefined = (mCurrentOffset == null || offset == mCurrentOffset);
+        mUpgradeToCurrentOffsetDefined = true;
         mCurrentOffset = offset;
         return this;
       }
