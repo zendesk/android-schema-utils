@@ -16,9 +16,11 @@
 
 package com.getbase.android.schema;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
@@ -29,6 +31,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -74,6 +77,22 @@ public class Schemas {
             }
           }
       );
+  private final ImmutableList<Release> mReleases;
+
+  private final Function<Integer, String> mRevisionDescriptionBuilder = new Function<Integer, String>() {
+    @Override
+    public String apply(final Integer revision) {
+      Release release = Iterables.find(mReleases, new Predicate<Release>() {
+        @Override
+        public boolean apply(Release r) {
+          return r.getSchemaVersion() <= revision;
+        }
+      });
+
+      int downgradeOffset = revision - release.getSchemaVersion();
+      return "revision " + revision + " (downgradeTo(" + downgradeOffset + ", ...) above " + release + ")";
+    }
+  };
 
   private ImmutableMap<String, ImmutableList<TableDefinitionOperation>> merge(
       ImmutableMap<String, ImmutableList<TableDefinitionOperation>> schema,
@@ -86,14 +105,14 @@ public class Schemas {
     }
 
     for (String alteredTable : Sets.intersection(downgrades.keySet(), schema.keySet())) {
-      ImmutableList<TableDefinitionOperation> mergedOperations = MERGER.merge(schema.get(alteredTable), downgrades.get(alteredTable), alteredTable, targetRevision);
+      ImmutableList<TableDefinitionOperation> mergedOperations = MERGER.merge(schema.get(alteredTable), downgrades.get(alteredTable), alteredTable, targetRevision, mRevisionDescriptionBuilder);
       if (!mergedOperations.isEmpty()) {
         builder.put(alteredTable, mergedOperations);
       }
     }
 
     for (String addedTable : Sets.difference(downgrades.keySet(), schema.keySet())) {
-      builder.put(addedTable, CONVERTER.convert(downgrades.get(addedTable), addedTable, targetRevision));
+      builder.put(addedTable, CONVERTER.convert(downgrades.get(addedTable), addedTable, targetRevision, mRevisionDescriptionBuilder));
     }
 
     return builder.build();
@@ -106,10 +125,12 @@ public class Schemas {
     private ImmutableList.Builder<TableDefinitionOperation> builder;
     private String mTable;
     private int mTargetRevision;
+    private Function<Integer, String> mRevisionDescriptionBuilder;
 
-    public ImmutableList<TableDefinitionOperation> convert(ImmutableList<TableDowngradeOperation> downgrades, String table, int targetRevision) {
+    public ImmutableList<TableDefinitionOperation> convert(ImmutableList<TableDowngradeOperation> downgrades, String table, int targetRevision, Function<Integer, String> revisionDescriptionBuilder) {
       mTable = table;
       mTargetRevision = targetRevision;
+      mRevisionDescriptionBuilder = revisionDescriptionBuilder;
       builder = ImmutableList.builder();
 
       for (TableDowngradeOperation downgrade : downgrades) {
@@ -131,7 +152,7 @@ public class Schemas {
 
     @Override
     public void visit(DropTable dropTable) {
-      throw new IllegalStateException("Trying to drop non existing table " + mTable + " while building schema version " + mTargetRevision);
+      throw new IllegalStateException("Trying to drop non existing table " + mTable + " while building " + mRevisionDescriptionBuilder.apply(mTargetRevision));
     }
 
     @Override
@@ -150,11 +171,13 @@ public class Schemas {
   private static class TableOperationMerger implements TableOperationVisitor {
     private String mTable;
     private int mTargetRevision;
+    private Function<Integer, String> mRevisionDescriptionBuilder;
     private Map<TableOperationId, TableDefinitionOperation> mMergedOperations;
 
-    public ImmutableList<TableDefinitionOperation> merge(ImmutableList<TableDefinitionOperation> schema, ImmutableList<TableDowngradeOperation> downgrades, String table, int targetRevision) {
+    public ImmutableList<TableDefinitionOperation> merge(ImmutableList<TableDefinitionOperation> schema, ImmutableList<TableDowngradeOperation> downgrades, String table, int targetRevision, Function<Integer, String> revisionDescriptionBuilder) {
       mTable = table;
       mTargetRevision = targetRevision;
+      mRevisionDescriptionBuilder = revisionDescriptionBuilder;
       mMergedOperations = Maps.newHashMap();
 
       for (TableOperation operation : schema) {
@@ -178,8 +201,8 @@ public class Schemas {
       TableDefinitionOperation droppedColumn = mMergedOperations.remove(dropColumn.getId());
       Preconditions.checkState(
           droppedColumn != null,
-          "Trying to drop non existing column %s.%s while building schema version %s",
-          mTable, dropColumn.mColumnName, mTargetRevision
+          "Trying to drop non existing column %s.%s while building %s",
+          mTable, dropColumn.mColumnName, mRevisionDescriptionBuilder.apply(mTargetRevision)
       );
     }
 
@@ -193,8 +216,8 @@ public class Schemas {
       TableDefinitionOperation droppedConstraint = mMergedOperations.remove(dropConstraint.getId());
       Preconditions.checkState(
           droppedConstraint != null,
-          "Trying to drop non existing constraint '%s' on table %s while building schema version %s",
-          dropConstraint.mConstraintDefinition, mTable, mTargetRevision
+          "Trying to drop non existing constraint '%s' on table %s while building %s",
+          dropConstraint.mConstraintDefinition, mTable, mRevisionDescriptionBuilder.apply(mTargetRevision)
       );
     }
 
@@ -207,10 +230,12 @@ public class Schemas {
   private Schemas(int currentRevision,
       Map<String, ImmutableList<TableDefinitionOperation>> tables,
       ImmutableMap<Integer, ImmutableMap<String, ImmutableList<TableDowngradeOperation>>> downgrades,
-      ImmutableMap<Integer, Migration[]> migrations) {
+      ImmutableMap<Integer, Migration[]> migrations,
+      ImmutableList<Release> releases) {
     mRevisions.put(currentRevision, ImmutableMap.copyOf(tables));
     mDowngrades = downgrades;
     mMigrations = migrations;
+    mReleases = releases;
   }
 
   public Schema getSchema(int version) {
@@ -553,6 +578,7 @@ public class Schemas {
     private final Map<String, ImmutableList<TableDefinitionOperation>> mTables = Maps.newHashMap();
     private final ImmutableMap.Builder<Integer, ImmutableMap<String, ImmutableList<TableDowngradeOperation>>> mDowngradesBuilder = ImmutableMap.builder();
     private final ImmutableMap.Builder<Integer, Migration[]> mMigrationsBuilder = ImmutableMap.builder();
+    private final ImmutableList.Builder<Release> mReleasesBuilder = ImmutableList.builder();
 
     private Integer mCurrentOffset;
     private boolean mUpgradeToCurrentOffsetDefined;
@@ -681,6 +707,7 @@ public class Schemas {
       }
 
       private void processPendingSchemaParts(Release release) {
+        mReleasesBuilder.add(release);
         int baseRevisionNumber = release.getSchemaVersion();
 
         for (Integer downgradeOffset : mPendingDowngrades.keySet()) {
@@ -716,7 +743,8 @@ public class Schemas {
               : mCurrentRevisionOffset,
           mTables,
           mDowngradesBuilder.build(),
-          mMigrationsBuilder.build());
+          mMigrationsBuilder.build(),
+          mReleasesBuilder.build());
     }
   }
 
