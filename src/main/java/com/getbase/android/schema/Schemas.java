@@ -557,6 +557,8 @@ public class Schemas {
     private Integer mCurrentOffset;
     private boolean mUpgradeToCurrentOffsetDefined;
 
+    private Release mLastRelease;
+
     private Release mCurrentRelease;
     private final Map<Integer, ImmutableMap<String, ImmutableList<TableDowngradeOperation>>> mPendingDowngrades = Maps.newHashMap();
     private final Map<Integer, Migration[]> mPendingMigrations = Maps.newHashMap();
@@ -632,6 +634,13 @@ public class Schemas {
       }
 
       public OldSchemasBuilder release(Release release) {
+        if (mLastRelease != null) {
+          Preconditions.checkArgument(release.getSchemaVersion() <= mLastRelease.getSchemaVersion(),
+              "Releases should have non-ascending revision numbers. The previous release had version number %s, so the release with revision number %s is not valid",
+              mLastRelease.getSchemaVersion(), release.getSchemaVersion()
+          );
+        }
+
         if (mCurrentRelease == null) {
           mCurrentRelease = release;
         }
@@ -639,6 +648,8 @@ public class Schemas {
 
         mCurrentOffset = null;
         mUpgradeToCurrentOffsetDefined = false;
+
+        mLastRelease = release;
 
         return this;
       }

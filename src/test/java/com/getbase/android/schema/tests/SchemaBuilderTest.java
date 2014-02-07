@@ -230,6 +230,22 @@ public class SchemaBuilderTest {
         .release(release(666));
   }
 
+  @Test
+  public void shouldAllowReleasesWithTheSameRevisionNumber() throws Exception {
+    Schemas.Builder
+        .currentSchema(2900)
+        .release(release(1500))
+        .release(release(1500));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectReleaseWithRevisionNumberHigherThanTheLastRelease() throws Exception {
+    Schemas.Builder
+        .currentSchema(0)
+        .release(release(1500))
+        .release(release(2900));
+  }
+
   @Test(expected = IllegalArgumentException.class)
   public void shouldRejectUpgradeWithZeroOffset() throws Exception {
     Schemas.Builder
