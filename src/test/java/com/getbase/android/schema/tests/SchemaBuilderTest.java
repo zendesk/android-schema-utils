@@ -265,6 +265,13 @@ public class SchemaBuilderTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectDowngradeWithNegativeOffset() throws Exception {
+    Schemas.Builder
+        .currentSchema(0)
+        .downgradeTo(-1, VALID_DOWNGRADE);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
   public void shouldRejectUpgradeWithNegativeOffset() throws Exception {
     Schemas.Builder
         .currentSchema(0)

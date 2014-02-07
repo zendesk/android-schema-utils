@@ -579,6 +579,7 @@ public class Schemas {
 
     public class OldSchemasBuilder {
       public OldSchemasBuilder downgradeTo(int offset, TableDowngrade... tableDowngrades) {
+        Preconditions.checkArgument(offset >= 0, "Downgrade offset cannot be negative");
         Preconditions.checkArgument(
             mCurrentOffset == null || offset < mCurrentOffset,
             "Downgrades and upgrades definitions should have descending offsets. The downgrade offset (%s) should be lower than current offset (%s)",
