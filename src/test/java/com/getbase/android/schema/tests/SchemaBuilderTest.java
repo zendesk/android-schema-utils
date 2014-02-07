@@ -229,4 +229,11 @@ public class SchemaBuilderTest {
         .downgradeTo(42, VALID_DOWNGRADE)
         .release(release(666));
   }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectUpgradeWithZeroOffset() throws Exception {
+    Schemas.Builder
+        .currentSchema(0)
+        .upgradeTo(0, EMPTY_MIGRATION);
+  }
 }
