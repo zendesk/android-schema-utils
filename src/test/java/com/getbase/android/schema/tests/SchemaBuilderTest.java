@@ -314,4 +314,14 @@ public class SchemaBuilderTest {
         .upgradeTo(1600, EMPTY_MIGRATION)
         .build();
   }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectDowngradeBetweenTwoReleaseMarkersWithTheSameVersion() throws Exception {
+    Schemas.Builder
+        .currentSchema(0)
+        .release(release(1500))
+        .downgradeTo(0, VALID_DOWNGRADE)
+        .release(release(1500))
+        .build();
+  }
 }

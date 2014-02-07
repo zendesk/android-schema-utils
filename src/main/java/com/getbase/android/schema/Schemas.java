@@ -710,6 +710,14 @@ public class Schemas {
         mReleasesBuilder.add(release);
         int baseRevisionNumber = release.getSchemaVersion();
 
+        if (mLastRelease != null && mLastRelease.getSchemaVersion() == release.getSchemaVersion()) {
+          Preconditions.checkArgument(
+              mPendingDowngrades.isEmpty() && mPendingMigrations.isEmpty(),
+              "Cannot define any upgrades or downgrades between releases %s and %s, because they have the same revision number (%s)",
+              mLastRelease, release, release.getSchemaVersion()
+          );
+        }
+
         for (Integer downgradeOffset : mPendingDowngrades.keySet()) {
           int revisionNumber = downgradeOffset + baseRevisionNumber;
           if (mLastRelease != null) {
