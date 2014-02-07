@@ -4,6 +4,8 @@ import static org.fest.assertions.Assertions.assertThat;
 
 import com.getbase.android.schema.Migration;
 import com.getbase.android.schema.Schemas;
+import com.getbase.android.schema.Schemas.AddColumn;
+import com.getbase.android.schema.Schemas.TableDowngrade;
 import com.google.common.collect.ImmutableList;
 
 import org.junit.Before;
@@ -29,6 +31,10 @@ public class SchemaBuilderTest {
     }
   };
 
+  public static final TableDowngrade VALID_DOWNGRADE = new TableDowngrade("Deals",
+      new AddColumn("ID", "")
+  );
+
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
@@ -47,12 +53,8 @@ public class SchemaBuilderTest {
     Schemas.Builder
         .currentSchema(2900)
         .downgradeTo(1500,
-            new Schemas.TableDowngrade("Deals",
-                new Schemas.AddColumn("ID", "")
-            ),
-            new Schemas.TableDowngrade("Deals",
-                new Schemas.AddColumn("ID", "")
-            )
+            VALID_DOWNGRADE,
+            VALID_DOWNGRADE
         );
   }
 
@@ -188,18 +190,14 @@ public class SchemaBuilderTest {
     Schemas.Builder
         .currentSchema(2900)
         .upgradeTo(1500, EMPTY_MIGRATION)
-        .downgradeTo(1600, new Schemas.TableDowngrade("Deals",
-            new Schemas.AddColumn("ID", "")
-        ));
+        .downgradeTo(1600, VALID_DOWNGRADE);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void shouldRejectUpgradeWithOffsetHigherThanLastDowngrade() throws Exception {
     Schemas.Builder
         .currentSchema(2900)
-        .downgradeTo(1500, new Schemas.TableDowngrade("Deals",
-            new Schemas.AddColumn("ID", "")
-        ))
+        .downgradeTo(1500, VALID_DOWNGRADE)
         .upgradeTo(1600, EMPTY_MIGRATION);
   }
 
@@ -207,9 +205,7 @@ public class SchemaBuilderTest {
   public void shouldAllowUpgradeWithTheSameOffsetAsTheLastDowngrade() throws Exception {
     Schemas.Builder
         .currentSchema(2900)
-        .downgradeTo(1500, new Schemas.TableDowngrade("Deals",
-            new Schemas.AddColumn("ID", "")
-        ))
+        .downgradeTo(1500, VALID_DOWNGRADE)
         .upgradeTo(1500, EMPTY_MIGRATION);
   }
 }
