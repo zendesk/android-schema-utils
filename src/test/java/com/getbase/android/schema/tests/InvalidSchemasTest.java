@@ -1,6 +1,7 @@
 package com.getbase.android.schema.tests;
 
 import static com.getbase.android.schema.Migrations.auto;
+import static com.getbase.android.schema.tests.TestUtils.EMPTY_MIGRATION;
 import static org.hamcrest.CoreMatchers.is;
 
 import com.getbase.android.schema.Migration;
@@ -118,6 +119,14 @@ public class InvalidSchemasTest {
     Schemas.Builder
         .currentSchema(2900)
         .upgradeTo(1500, auto(), auto())
+        .build();
+  }
+
+  @Test
+  public void shouldAllowMultipleMigrationsStartingWithAuto() throws Exception {
+    Schemas.Builder
+        .currentSchema(2900)
+        .upgradeTo(1500, auto(), EMPTY_MIGRATION)
         .build();
   }
 

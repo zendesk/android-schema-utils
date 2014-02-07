@@ -605,15 +605,25 @@ public class Schemas {
         Preconditions.checkArgument(offset > 0, "In upgradeTo(%s, ...): Upgrade offset should be greater than 0", offset);
         Preconditions.checkArgument(migrations != null, "In upgradeTo(%s, ...): migrations cannot be null", offset);
         Preconditions.checkArgument(migrations.length > 0, "In upgradeTo(%s, ...): migrations cannot be empty", offset);
-        Preconditions.checkArgument(migrations.length == 1 && migrations[0] != AUTO_MIGRATION,
-            "In upgradeTo(%s, ...): upgrades with a single auto() migration are implicitly performed for every revision without explicit upgradeTo()", offset);
-        Preconditions.checkArgument(migrations.length <= 1 ||
-            FluentIterable
-                .from(Arrays.asList(migrations))
-                .filter(Predicates.equalTo(AUTO_MIGRATION))
-                .size() <= 1,
-            "In upgradeTo(%s, ...): only one auto() migration per upgrade is allowed", offset
-        );
+
+        switch (migrations.length) {
+        case 1:
+          Preconditions.checkArgument(migrations[0] != AUTO_MIGRATION,
+              "In upgradeTo(%s, ...): upgrades with a single auto() migration are implicitly performed for every revision without explicit upgradeTo()",
+              offset
+          );
+          break;
+        default:
+          Preconditions.checkArgument(
+              FluentIterable
+                  .from(Arrays.asList(migrations))
+                  .filter(Predicates.equalTo(AUTO_MIGRATION))
+                  .size() <= 1,
+              "In upgradeTo(%s, ...): only one auto() migration per upgrade is allowed",
+              offset
+          );
+        }
+
         if (mCurrentOffset != null) {
           if (mUpgradeToCurrentOffsetDefined) {
             Preconditions.checkArgument(offset < mCurrentOffset,
