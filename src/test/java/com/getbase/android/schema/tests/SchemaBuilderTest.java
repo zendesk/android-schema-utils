@@ -5,6 +5,7 @@ import static org.fest.assertions.Assertions.assertThat;
 import com.getbase.android.schema.Migration;
 import com.getbase.android.schema.Schemas;
 import com.getbase.android.schema.Schemas.AddColumn;
+import com.getbase.android.schema.Schemas.Release;
 import com.getbase.android.schema.Schemas.TableDowngrade;
 import com.google.common.collect.ImmutableList;
 
@@ -34,6 +35,15 @@ public class SchemaBuilderTest {
   public static final TableDowngrade VALID_DOWNGRADE = new TableDowngrade("Deals",
       new AddColumn("ID", "")
   );
+
+  private static Release release(final int revision) {
+    return new Release() {
+      @Override
+      public int getSchemaVersion() {
+        return revision;
+      }
+    };
+  }
 
   @Before
   public void setUp() throws Exception {
@@ -207,5 +217,25 @@ public class SchemaBuilderTest {
         .currentSchema(2900)
         .downgradeTo(1500, VALID_DOWNGRADE)
         .upgradeTo(1500, EMPTY_MIGRATION);
+  }
+
+  @Test
+  public void shouldAllowUpgradeWithTheSameOffsetInSectionsForDifferentReleaseMarkers() throws Exception {
+    Schemas.Builder
+        .currentSchema(2900)
+        .upgradeTo(42, EMPTY_MIGRATION)
+        .release(release(1500))
+        .upgradeTo(42, EMPTY_MIGRATION)
+        .release(release(666));
+  }
+
+  @Test
+  public void shouldAllowDowngradeWithTheSameOffsetInSectionsForDifferentReleaseMarkers() throws Exception {
+    Schemas.Builder
+        .currentSchema(2900)
+        .downgradeTo(42, VALID_DOWNGRADE)
+        .release(release(1500))
+        .downgradeTo(42, VALID_DOWNGRADE)
+        .release(release(666));
   }
 }
