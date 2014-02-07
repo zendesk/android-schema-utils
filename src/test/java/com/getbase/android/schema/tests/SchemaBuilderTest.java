@@ -1,12 +1,11 @@
 package com.getbase.android.schema.tests;
 
+import static com.getbase.android.schema.tests.TestUtils.EMPTY_MIGRATION;
+import static com.getbase.android.schema.tests.TestUtils.VALID_DOWNGRADE;
 import static com.getbase.android.schema.tests.TestUtils.release;
 import static org.fest.assertions.Assertions.assertThat;
 
-import com.getbase.android.schema.Migration;
 import com.getbase.android.schema.Schemas;
-import com.getbase.android.schema.Schemas.AddColumn;
-import com.getbase.android.schema.Schemas.TableDowngrade;
 import com.google.common.collect.ImmutableList;
 
 import org.junit.Before;
@@ -16,25 +15,11 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
-
 import java.util.List;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(reportSdk = 10, manifest = Config.NONE)
 public class SchemaBuilderTest {
-
-  public static final Migration EMPTY_MIGRATION = new Migration() {
-    @Override
-    public void apply(int version, SQLiteDatabase database, Schemas schemas, Context context) {
-
-    }
-  };
-
-  public static final TableDowngrade VALID_DOWNGRADE = new TableDowngrade("Deals",
-      new AddColumn("ID", "")
-  );
 
   @Before
   public void setUp() throws Exception {
