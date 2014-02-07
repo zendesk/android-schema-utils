@@ -1,11 +1,11 @@
 package com.getbase.android.schema.tests;
 
+import static com.getbase.android.schema.tests.TestUtils.release;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 
 import com.getbase.android.schema.Schemas;
-import com.getbase.android.schema.Schemas.DropTable;
-import com.getbase.android.schema.Schemas.TableDowngrade;
+import com.getbase.android.schema.Schemas.Builder;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
@@ -26,12 +26,24 @@ public class SchemasTest {
     MockitoAnnotations.initMocks(this);
   }
 
-  public void shouldReturnCorrectCurrentSchemaVersion() throws Exception {
-    Schemas db = Schemas.Builder
+  @Test
+  public void shouldCalculateCurrentRevisionNumberAsCurrentSchemaOffsetPlusMostRecentReleaseMarker() throws Exception {
+    Schemas schemas = Builder
+        .currentSchema(2900)
+        .release(release(1500))
+        .release(release(666))
+        .build();
+
+    assertThat(schemas.getCurrentRevisionNumber()).isEqualTo(4400);
+  }
+
+  @Test
+  public void shouldUseCurrentSchemaOffsetAsCurrentRevisionNumberWhenThereAreNoReleaseMarkers() throws Exception {
+    Schemas schemas = Builder
         .currentSchema(2900)
         .build();
 
-    assertThat(db.getCurrentRevisionNumber()).isEqualTo(2900);
+    assertThat(schemas.getCurrentRevisionNumber()).isEqualTo(2900);
   }
 
   @Test
@@ -56,5 +68,4 @@ public class SchemasTest {
 
     db.getSchema(2900);
   }
-
 }
