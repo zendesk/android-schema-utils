@@ -36,6 +36,7 @@ import com.google.common.collect.Sets.SetView;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,6 +44,8 @@ import java.util.List;
 import java.util.Map;
 
 public class Schemas {
+  private static final String TAG = Schemas.class.getSimpleName();
+
   private final ImmutableMap<Integer, Migration[]> mMigrations;
   private final ImmutableMap<Integer, ImmutableMap<String, ImmutableList<TableDowngradeOperation>>> mDowngrades;
   private final LoadingCache<Integer, ImmutableMap<String, ImmutableList<TableDefinitionOperation>>> mRevisions =
@@ -51,11 +54,13 @@ public class Schemas {
             @Override
             public ImmutableMap<String, ImmutableList<TableDefinitionOperation>> load(Integer key) throws Exception {
               Integer lastMergedRevision = Collections.min(mRevisions.asMap().keySet());
+              Log.d(TAG, "Building migration to " + key + " (min schema prepared: " + lastMergedRevision + ")");
               Preconditions.checkState(lastMergedRevision > key, "Trying to retrieve version %s, which is higher than current schema version", key);
               ImmutableMap<String, ImmutableList<TableDefinitionOperation>> schema = mRevisions.getIfPresent(lastMergedRevision);
               Preconditions.checkState(schema != null);
 
               for (int revision = lastMergedRevision - 1; ; --revision) {
+                Log.d(TAG, "Prepare schema for " + revision);
                 if (mDowngrades.containsKey(revision)) {
                   schema = merge(schema, mDowngrades.get(revision), revision);
                 }
@@ -689,6 +694,7 @@ public class Schemas {
   public void upgrade(int fromVersion, Context context, SQLiteDatabase database) {
     int currentVersion = getCurrentRevisionNumber();
     for (int version = fromVersion + 1; version <= currentVersion; version++) {
+      Log.d(TAG, "Perform migration to " + version);
       for (Migration migration : to(version)) {
         migration.apply(version, database, this, context);
       }
