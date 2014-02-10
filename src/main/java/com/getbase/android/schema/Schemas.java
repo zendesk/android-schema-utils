@@ -275,7 +275,7 @@ public class Schemas {
 
     public String getCreateTableStatement(String tableName) {
       Preconditions.checkArgument(mTableDefinitions.containsKey(tableName), "Schema for version %s doesn't contain table %s", mVersion, tableName);
-      return new TableCreateStatementBuilder().build(tableName, mTableDefinitions.get(tableName));
+      return CREATE_STATEMENT_BUILDER.build(tableName, mTableDefinitions.get(tableName));
     }
 
     public ImmutableSet<String> getTables() {
@@ -340,7 +340,9 @@ public class Schemas {
     return mCurrentRevision.get();
   }
 
-  public static class TableCreateStatementBuilder implements TableOperationVisitor {
+  private static final TableCreateStatementBuilder CREATE_STATEMENT_BUILDER = new TableCreateStatementBuilder();
+
+  private static class TableCreateStatementBuilder implements TableOperationVisitor {
     private List<String> mColumns;
     private List<String> mConstraints;
 
