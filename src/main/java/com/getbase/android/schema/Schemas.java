@@ -48,6 +48,17 @@ import java.util.Map;
 
 public class Schemas {
   private static final String TAG = Schemas.class.getSimpleName();
+  private static final Release INITIAL_DB_SCHEMA = new Release() {
+    @Override
+    public int getSchemaVersion() {
+      return 0;
+    }
+
+    @Override
+    public String toString() {
+      return "INITIAL DB SCHEMA";
+    }
+  };
 
   private final ImmutableMap<Integer, Migration[]> mMigrations;
   private final ImmutableMap<Integer, ImmutableMap<String, ImmutableList<TableDowngradeOperation>>> mDowngrades;
@@ -692,17 +703,7 @@ public class Schemas {
       }
 
       public Schemas build() {
-        processPendingSchemaParts(new Release() {
-          @Override
-          public int getSchemaVersion() {
-            return 0;
-          }
-
-          @Override
-          public String toString() {
-            return "INITIAL DB SCHEMA";
-          }
-        });
+        processPendingSchemaParts(INITIAL_DB_SCHEMA);
         return Builder.this.build();
       }
 
