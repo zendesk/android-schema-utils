@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 0.3 *(2014-02-10)*
+----------------------------
+
+ * Reduce memory footprint after schema upgrade
+
 Version 0.2 *(2014-02-07)*
 ----------------------------
 
