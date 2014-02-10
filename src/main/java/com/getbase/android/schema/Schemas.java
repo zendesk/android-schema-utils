@@ -45,6 +45,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Schemas {
   private static final String TAG = Schemas.class.getSimpleName();
@@ -803,5 +804,12 @@ public class Schemas {
         migration.apply(version, database, this, context);
       }
     }
+    clearRevisionsCache();
+  }
+
+  private void clearRevisionsCache() {
+    Set<Integer> cachedRevisions = Sets.newHashSet(mRevisions.asMap().keySet());
+    cachedRevisions.remove(mCurrentRevision.get());
+    mRevisions.invalidateAll(cachedRevisions);
   }
 }
