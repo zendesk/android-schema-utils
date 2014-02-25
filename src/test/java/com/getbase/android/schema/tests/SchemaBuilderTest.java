@@ -1,5 +1,8 @@
 package com.getbase.android.schema.tests;
 
+import static com.getbase.android.schema.tests.TestUtils.EMPTY_MIGRATION;
+import static com.getbase.android.schema.tests.TestUtils.VALID_DOWNGRADE;
+import static com.getbase.android.schema.tests.TestUtils.release;
 import static org.fest.assertions.Assertions.assertThat;
 
 import com.getbase.android.schema.Schemas;
@@ -15,7 +18,7 @@ import org.robolectric.annotation.Config;
 import java.util.List;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(reportSdk = 10)
+@Config(reportSdk = 10, manifest = Config.NONE)
 public class SchemaBuilderTest {
 
   @Before
@@ -27,8 +30,8 @@ public class SchemaBuilderTest {
   public void shouldRejectDuplicateTablesInCurrentSchema() throws Exception {
     Schemas.Builder
         .currentSchema(1500,
-            new Schemas.TableDefinition("Deals"),
-            new Schemas.TableDefinition("Deals"));
+            new Schemas.TableDefinition("Deals", new Schemas.AddColumn("ID", "")),
+            new Schemas.TableDefinition("Deals", new Schemas.AddColumn("ID", "")));
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -36,8 +39,9 @@ public class SchemaBuilderTest {
     Schemas.Builder
         .currentSchema(2900)
         .downgradeTo(1500,
-            new Schemas.TableDowngrade("Deals"),
-            new Schemas.TableDowngrade("Deals"));
+            VALID_DOWNGRADE,
+            VALID_DOWNGRADE
+        );
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -60,6 +64,22 @@ public class SchemaBuilderTest {
         .currentSchema(2900)
         .downgradeTo(1500)
         .downgradeTo(1500);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectDuplicateUpgrades() throws Exception {
+    Schemas.Builder
+        .currentSchema(2900)
+        .upgradeTo(1500, EMPTY_MIGRATION)
+        .upgradeTo(1500, EMPTY_MIGRATION);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectDowngradesWithNotDescendingOffsets() throws Exception {
+    Schemas.Builder
+        .currentSchema(2900)
+        .downgradeTo(1500)
+        .downgradeTo(1600);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -149,5 +169,159 @@ public class SchemaBuilderTest {
     }
 
     assertThat(count).isEqualTo(operations.size());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectDowngradeWithOffsetHigherThanLastUpgrade() throws Exception {
+    Schemas.Builder
+        .currentSchema(2900)
+        .upgradeTo(1500, EMPTY_MIGRATION)
+        .downgradeTo(1600, VALID_DOWNGRADE);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectUpgradeWithOffsetHigherThanLastDowngrade() throws Exception {
+    Schemas.Builder
+        .currentSchema(2900)
+        .downgradeTo(1500, VALID_DOWNGRADE)
+        .upgradeTo(1600, EMPTY_MIGRATION);
+  }
+
+  @Test
+  public void shouldAllowUpgradeWithTheSameOffsetAsTheLastDowngrade() throws Exception {
+    Schemas.Builder
+        .currentSchema(2900)
+        .downgradeTo(1500, VALID_DOWNGRADE)
+        .upgradeTo(1500, EMPTY_MIGRATION);
+  }
+
+  @Test
+  public void shouldAllowUpgradeWithTheSameOffsetInSectionsForDifferentReleaseMarkers() throws Exception {
+    Schemas.Builder
+        .currentSchema(2900)
+        .upgradeTo(42, EMPTY_MIGRATION)
+        .release(release(1500))
+        .upgradeTo(42, EMPTY_MIGRATION)
+        .release(release(666));
+  }
+
+  @Test
+  public void shouldAllowDowngradeWithTheSameOffsetInSectionsForDifferentReleaseMarkers() throws Exception {
+    Schemas.Builder
+        .currentSchema(2900)
+        .downgradeTo(42, VALID_DOWNGRADE)
+        .release(release(1500))
+        .downgradeTo(42, VALID_DOWNGRADE)
+        .release(release(666));
+  }
+
+  @Test
+  public void shouldAllowReleasesWithTheSameRevisionNumber() throws Exception {
+    Schemas.Builder
+        .currentSchema(2900)
+        .release(release(1500))
+        .release(release(1500));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectReleaseWithRevisionNumberHigherThanTheLastRelease() throws Exception {
+    Schemas.Builder
+        .currentSchema(0)
+        .release(release(1500))
+        .release(release(2900));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectDowngradeForVersionEqualToVersionOfTheNextRelease() throws Exception {
+    Schemas.Builder
+        .currentSchema(0)
+        .release(release(1600))
+        .downgradeTo(100, VALID_DOWNGRADE)
+        .release(release(1500));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectDowngradeForVersionEqualToVersionOfTheNextReleaseInInitialSchemaCase() throws Exception {
+    Schemas.Builder
+        .currentSchema(0)
+        .release(release(1500))
+        .downgradeTo(1500, VALID_DOWNGRADE)
+        .build();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectDowngradeWithNegativeOffset() throws Exception {
+    Schemas.Builder
+        .currentSchema(0)
+        .downgradeTo(-1, VALID_DOWNGRADE);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectUpgradeWithNegativeOffset() throws Exception {
+    Schemas.Builder
+        .currentSchema(0)
+        .upgradeTo(-1, EMPTY_MIGRATION);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectDowngradeForVersionHigherThanVersionOfTheNextRelease() throws Exception {
+    Schemas.Builder
+        .currentSchema(0)
+        .release(release(1600))
+        .downgradeTo(101, VALID_DOWNGRADE)
+        .release(release(1500));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectDowngradeForVersionHigherThanVersionOfTheNextReleaseInInitialSchemaCase() throws Exception {
+    Schemas.Builder
+        .currentSchema(0)
+        .release(release(1500))
+        .downgradeTo(2900, VALID_DOWNGRADE)
+        .build();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectUpgradeWithZeroOffset() throws Exception {
+    Schemas.Builder
+        .currentSchema(0)
+        .upgradeTo(0, EMPTY_MIGRATION);
+  }
+
+  @Test
+  public void shouldAcceptUpgradeForVersionEqualToVersionOfTheNextRelease() throws Exception {
+    Schemas.Builder
+        .currentSchema(0)
+        .release(release(1600))
+        .upgradeTo(100, EMPTY_MIGRATION)
+        .release(release(1500));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectUpgradeForVersionHigherThanVersionOfTheNextRelease() throws Exception {
+    Schemas.Builder
+        .currentSchema(0)
+        .release(release(1600))
+        .upgradeTo(101, EMPTY_MIGRATION)
+        .release(release(1500));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectUpgradeFromInitialSchemaForVersionHigherThanVersionOfTheNextRelease() throws Exception {
+    Schemas.Builder
+        .currentSchema(0)
+        .release(release(1500))
+        .upgradeTo(1600, EMPTY_MIGRATION)
+        .build();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectDowngradeBetweenTwoReleaseMarkersWithTheSameVersion() throws Exception {
+    Schemas.Builder
+        .currentSchema(0)
+        .release(release(1500))
+        .downgradeTo(0, VALID_DOWNGRADE)
+        .release(release(1500))
+        .build();
   }
 }
