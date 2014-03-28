@@ -6,6 +6,9 @@ import static com.getbase.android.schema.tests.TestUtils.release;
 import static org.fest.assertions.Assertions.assertThat;
 
 import com.getbase.android.schema.Schemas;
+import com.getbase.android.schema.Schemas.AddColumn;
+import com.getbase.android.schema.Schemas.TableDefinition;
+import com.getbase.android.schema.Schemas.TableDowngrade;
 import com.google.common.collect.ImmutableList;
 
 import org.junit.Before;
@@ -322,6 +325,17 @@ public class SchemaBuilderTest {
         .release(release(1500))
         .downgradeTo(0, VALID_DOWNGRADE)
         .release(release(1500))
+        .build();
+  }
+
+  private static final ImmutableList<AddColumn> LEGACY_COLUMNS = ImmutableList.of();
+
+  public void shouldAllowUsingImmutableListOfAddColumnsInDowngradeDefinition() {
+    Schemas.Builder
+        .currentSchema(1,
+            new TableDefinition("test", new AddColumn("id", "INTEGER"))
+        )
+        .downgradeTo(0, new TableDowngrade("test", LEGACY_COLUMNS))
         .build();
   }
 }

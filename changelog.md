@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+HEAD
+----
+
+ * More flexible generics in TableDowngrade constructor
+ 
 Version 0.4 *(2014-02-25)*
 ----------------------------
 

@@ -62,16 +62,16 @@ public class Schemas {
   };
 
   private final ImmutableMap<Integer, Migration[]> mMigrations;
-  private final ImmutableMap<Integer, ImmutableMap<String, ImmutableList<TableDowngradeOperation>>> mDowngrades;
-  private final LoadingCache<Integer, ImmutableMap<String, ImmutableList<TableDefinitionOperation>>> mRevisions =
+  private final ImmutableMap<Integer, ImmutableMap<String, ImmutableList<? extends TableDowngradeOperation>>> mDowngrades;
+  private final LoadingCache<Integer, ImmutableMap<String, ImmutableList<? extends TableDefinitionOperation>>> mRevisions =
       CacheBuilder.newBuilder().build(
-          new CacheLoader<Integer, ImmutableMap<String, ImmutableList<TableDefinitionOperation>>>() {
+          new CacheLoader<Integer, ImmutableMap<String, ImmutableList<? extends TableDefinitionOperation>>>() {
             @Override
-            public ImmutableMap<String, ImmutableList<TableDefinitionOperation>> load(Integer key) throws Exception {
+            public ImmutableMap<String, ImmutableList<? extends TableDefinitionOperation>> load(Integer key) throws Exception {
               Integer lastMergedRevision = Collections.min(mRevisions.asMap().keySet());
               Log.d(TAG, "Building migration to " + key + " (min schema prepared: " + lastMergedRevision + ")");
               Preconditions.checkState(lastMergedRevision > key, "Trying to retrieve version %s, which is higher than current schema version", key);
-              ImmutableMap<String, ImmutableList<TableDefinitionOperation>> schema = mRevisions.getIfPresent(lastMergedRevision);
+              ImmutableMap<String, ImmutableList<? extends TableDefinitionOperation>> schema = mRevisions.getIfPresent(lastMergedRevision);
               Preconditions.checkState(schema != null);
 
               for (int revision = lastMergedRevision - 1; ; --revision) {
@@ -106,18 +106,18 @@ public class Schemas {
     }
   };
 
-  private ImmutableMap<String, ImmutableList<TableDefinitionOperation>> merge(
-      ImmutableMap<String, ImmutableList<TableDefinitionOperation>> schema,
-      ImmutableMap<String, ImmutableList<TableDowngradeOperation>> downgrades,
+  private ImmutableMap<String, ImmutableList<? extends TableDefinitionOperation>> merge(
+      ImmutableMap<String, ImmutableList<? extends TableDefinitionOperation>> schema,
+      ImmutableMap<String, ImmutableList<? extends TableDowngradeOperation>> downgrades,
       int targetRevision) {
-    ImmutableMap.Builder<String, ImmutableList<TableDefinitionOperation>> builder = ImmutableMap.builder();
+    ImmutableMap.Builder<String, ImmutableList<? extends TableDefinitionOperation>> builder = ImmutableMap.builder();
 
     for (String unchangedTable : Sets.difference(schema.keySet(), downgrades.keySet())) {
       builder.put(unchangedTable, schema.get(unchangedTable));
     }
 
     for (String alteredTable : Sets.intersection(downgrades.keySet(), schema.keySet())) {
-      ImmutableList<TableDefinitionOperation> mergedOperations = MERGER.merge(schema.get(alteredTable), downgrades.get(alteredTable), alteredTable, targetRevision, mRevisionDescriptionBuilder);
+      ImmutableList<? extends TableDefinitionOperation> mergedOperations = MERGER.merge(schema.get(alteredTable), downgrades.get(alteredTable), alteredTable, targetRevision, mRevisionDescriptionBuilder);
       if (!mergedOperations.isEmpty()) {
         builder.put(alteredTable, mergedOperations);
       }
@@ -139,7 +139,7 @@ public class Schemas {
     private int mTargetRevision;
     private Function<Integer, String> mRevisionDescriptionBuilder;
 
-    public ImmutableList<TableDefinitionOperation> convert(ImmutableList<TableDowngradeOperation> downgrades, String table, int targetRevision, Function<Integer, String> revisionDescriptionBuilder) {
+    public ImmutableList<? extends TableDefinitionOperation> convert(ImmutableList<? extends TableDowngradeOperation> downgrades, String table, int targetRevision, Function<Integer, String> revisionDescriptionBuilder) {
       mTable = table;
       mTargetRevision = targetRevision;
       mRevisionDescriptionBuilder = revisionDescriptionBuilder;
@@ -186,7 +186,7 @@ public class Schemas {
     private Function<Integer, String> mRevisionDescriptionBuilder;
     private Map<TableOperationId, TableDefinitionOperation> mMergedOperations;
 
-    public ImmutableList<TableDefinitionOperation> merge(ImmutableList<TableDefinitionOperation> schema, ImmutableList<TableDowngradeOperation> downgrades, String table, int targetRevision, Function<Integer, String> revisionDescriptionBuilder) {
+    public ImmutableList<? extends TableDefinitionOperation> merge(ImmutableList<? extends TableDefinitionOperation> schema, ImmutableList<? extends TableDowngradeOperation> downgrades, String table, int targetRevision, Function<Integer, String> revisionDescriptionBuilder) {
       mTable = table;
       mTargetRevision = targetRevision;
       mRevisionDescriptionBuilder = revisionDescriptionBuilder;
@@ -240,8 +240,8 @@ public class Schemas {
   }
 
   private Schemas(int currentRevision,
-      Map<String, ImmutableList<TableDefinitionOperation>> tables,
-      ImmutableMap<Integer, ImmutableMap<String, ImmutableList<TableDowngradeOperation>>> downgrades,
+      Map<String, ImmutableList<? extends TableDefinitionOperation>> tables,
+      ImmutableMap<Integer, ImmutableMap<String, ImmutableList<? extends TableDowngradeOperation>>> downgrades,
       ImmutableMap<Integer, Migration[]> migrations,
       ImmutableList<Release> releases) {
     mRevisions.put(currentRevision, ImmutableMap.copyOf(tables));
@@ -265,7 +265,7 @@ public class Schemas {
   }
 
   public class Schema {
-    private final ImmutableMap<String, ImmutableList<TableDefinitionOperation>> mTableDefinitions;
+    private final ImmutableMap<String, ImmutableList<? extends TableDefinitionOperation>> mTableDefinitions;
     private final int mVersion;
 
     private Schema(int version) {
@@ -293,7 +293,7 @@ public class Schemas {
 
     ImmutableSet.Builder<String> mBuilder;
 
-    public ImmutableSet<String> getColumns(Iterable<TableDefinitionOperation> operations) {
+    public ImmutableSet<String> getColumns(Iterable<? extends TableDefinitionOperation> operations) {
       mBuilder = ImmutableSet.builder();
 
       for (TableDefinitionOperation operation : operations) {
@@ -346,7 +346,7 @@ public class Schemas {
     private List<String> mColumns;
     private List<String> mConstraints;
 
-    public String build(String tableName, ImmutableList<TableDefinitionOperation> operations) {
+    public String build(String tableName, ImmutableList<? extends TableDefinitionOperation> operations) {
       mColumns = Lists.newArrayList();
       mConstraints = Lists.newArrayList();
 
@@ -552,20 +552,20 @@ public class Schemas {
       super(tableName, operations);
     }
 
-    public TableDowngrade(String tableName, ImmutableList<TableDowngradeOperation> operations) {
+    public TableDowngrade(String tableName, ImmutableList<? extends TableDowngradeOperation> operations) {
       super(tableName, operations);
     }
   }
 
   private static class SchemaPart<T extends TableOperation> {
     protected final String mTableName;
-    protected final ImmutableList<T> mOperations;
+    protected final ImmutableList<? extends T> mOperations;
 
     private SchemaPart(String tableName, T... operations) {
       this(tableName, ImmutableList.copyOf(operations));
     }
 
-    private SchemaPart(String tableName, ImmutableList<T> operations) {
+    private SchemaPart(String tableName, ImmutableList<? extends T> operations) {
       validateTableOperations(tableName, operations);
 
       mTableName = tableName;
@@ -589,8 +589,8 @@ public class Schemas {
 
   public static class Builder {
     private final int mCurrentRevisionOffset;
-    private final Map<String, ImmutableList<TableDefinitionOperation>> mTables = Maps.newHashMap();
-    private final ImmutableMap.Builder<Integer, ImmutableMap<String, ImmutableList<TableDowngradeOperation>>> mDowngradesBuilder = ImmutableMap.builder();
+    private final Map<String, ImmutableList<? extends TableDefinitionOperation>> mTables = Maps.newHashMap();
+    private final ImmutableMap.Builder<Integer, ImmutableMap<String, ImmutableList<? extends TableDowngradeOperation>>> mDowngradesBuilder = ImmutableMap.builder();
     private final ImmutableMap.Builder<Integer, Migration[]> mMigrationsBuilder = ImmutableMap.builder();
     private final ImmutableList.Builder<Release> mReleasesBuilder = ImmutableList.builder();
 
@@ -600,7 +600,7 @@ public class Schemas {
     private Release mLastRelease;
 
     private Release mCurrentRelease;
-    private final Map<Integer, ImmutableMap<String, ImmutableList<TableDowngradeOperation>>> mPendingDowngrades = Maps.newHashMap();
+    private final Map<Integer, ImmutableMap<String, ImmutableList<? extends TableDowngradeOperation>>> mPendingDowngrades = Maps.newHashMap();
     private final Map<Integer, Migration[]> mPendingMigrations = Maps.newHashMap();
 
     private Builder(int offset, TableDefinition[] tables) {
@@ -626,7 +626,7 @@ public class Schemas {
             offset, mCurrentOffset
         );
 
-        Map<String, ImmutableList<TableDowngradeOperation>> downgrades = Maps.newHashMap();
+        Map<String, ImmutableList<? extends TableDowngradeOperation>> downgrades = Maps.newHashMap();
         for (TableDowngrade tableDowngrade : tableDowngrades) {
           Preconditions.checkArgument(
               downgrades.put(tableDowngrade.mTableName, tableDowngrade.mOperations) == null,
