@@ -37,12 +37,25 @@ import android.database.sqlite.SQLiteDatabase;
 @Config(manifest = Config.NONE)
 public class MigrationsTest {
 
+  private static final MigrationsHelper MIGRATIONS_HELPER = new MigrationsHelper();
+
   private static final Schemas SCHEMAS = Builder
-      .currentSchema(2,
+      .currentSchema(4,
           new TableDefinition("Contacts",
               new AddColumn("id", "INTEGER"),
-              new AddColumn("created_at", "INTEGER")
+              new AddColumn("created_at", "INTEGER"),
+              new AddColumn("updated_at", "INTEGER")
           )
+      )
+      .upgradeTo(4,
+          SimpleTableMigration
+              .of("Contacts")
+              .withMapping("created_at", "STRFTIME('%s', 'now')")
+              .withMapping("updated_at", "STRFTIME('%s', 'now')")
+              .using(MIGRATIONS_HELPER)
+      )
+      .downgradeTo(2,
+          new TableDowngrade("Contacts", new DropColumn("updated_at"))
       )
       .downgradeTo(1,
           new TableDowngrade("Contacts", new DropColumn("created_at"))
@@ -63,6 +76,12 @@ public class MigrationsTest {
     SQLiteDatabase v2 = getDb(SCHEMAS, 2);
     assertThat(MigrationsHelper.getColumns(v2, "Contacts")).containsOnly("id", "created_at");
     v2.close();
+  }
+
+  @Test
+  public void shouldPerformSimpleMigrationWithDuplicatedMappingValue() throws Exception {
+    getDb(SCHEMAS, 3).close();
+    getDb(SCHEMAS, 4).close();
   }
 
   private SQLiteDatabase getDb(Schemas schemas, int version) {

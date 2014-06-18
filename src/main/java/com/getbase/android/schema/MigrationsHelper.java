@@ -22,6 +22,7 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 
@@ -63,8 +64,8 @@ public class MigrationsHelper {
       }
 
       SetView<String> unmappedColumns = Sets.difference(commonColumns, migration.mappings.keySet());
-      String insertColumnsString = Joiner.on(",").join(Sets.union(unmappedColumns, migration.mappings.keySet()));
-      String selectColumnsString = Joiner.on(",").join(Sets.union(unmappedColumns, ImmutableSet.copyOf(migration.mappings.values())));
+      String insertColumnsString = Joiner.on(",").join(Iterables.concat(unmappedColumns, migration.mappings.keySet()));
+      String selectColumnsString = Joiner.on(",").join(Iterables.concat(unmappedColumns, migration.mappings.values()));
 
       db.execSQL("INSERT INTO " + migration.tableName + "(" + insertColumnsString + ") SELECT " + selectColumnsString + " FROM " + tempTable);
       db.execSQL("DROP TABLE " + tempTable);
