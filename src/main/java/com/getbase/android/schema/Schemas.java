@@ -798,9 +798,16 @@ public class Schemas {
     );
   }
 
+  /**
+   * Use {@link #upgrade(android.content.Context, android.database.sqlite.SQLiteDatabase, int, int)} instead.
+   */
+  @Deprecated
   public void upgrade(int fromVersion, Context context, SQLiteDatabase database) {
-    int currentVersion = getCurrentRevisionNumber();
-    for (int version = fromVersion + 1; version <= currentVersion; version++) {
+    upgrade(context, database, fromVersion, getCurrentRevisionNumber());
+  }
+
+  public void upgrade(Context context, SQLiteDatabase database, int fromVersion, int toVersion) {
+    for (int version = fromVersion + 1; version <= toVersion; version++) {
       Log.d(TAG, "Perform migration to " + version);
       for (Migration migration : to(version)) {
         migration.apply(version, database, this, context);

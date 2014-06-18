@@ -48,6 +48,6 @@ public class TestDatabase extends SQLiteOpenHelper {
 
   @Override
   public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-    mSchemas.upgrade(oldVersion, mContext, db);
+    mSchemas.upgrade(mContext, db, oldVersion, newVersion);
   }
 }
