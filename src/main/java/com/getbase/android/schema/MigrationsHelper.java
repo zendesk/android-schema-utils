@@ -114,7 +114,7 @@ public class MigrationsHelper {
     }
   }
 
-  private static ImmutableSet<String> getColumns(SQLiteDatabase db, String table) {
+  static ImmutableSet<String> getColumns(SQLiteDatabase db, String table) {
     Cursor cursor = db.query(table, null, null, null, null, null, null, "0");
     if (cursor != null) {
       try {
