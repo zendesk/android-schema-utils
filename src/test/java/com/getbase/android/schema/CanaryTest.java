@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.getbase.android.schema.tests;
+package com.getbase.android.schema;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

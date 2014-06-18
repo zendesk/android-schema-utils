@@ -1,4 +1,4 @@
-package com.getbase.android.schema.tests;
+package com.getbase.android.schema;
 
 import com.getbase.android.schema.Migration;
 import com.getbase.android.schema.Schemas;

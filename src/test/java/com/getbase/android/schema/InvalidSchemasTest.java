@@ -1,11 +1,8 @@
-package com.getbase.android.schema.tests;
+package com.getbase.android.schema;
 
 import static com.getbase.android.schema.Migrations.auto;
-import static com.getbase.android.schema.tests.TestUtils.EMPTY_MIGRATION;
+import static com.getbase.android.schema.TestUtils.EMPTY_MIGRATION;
 import static org.hamcrest.CoreMatchers.is;
-
-import com.getbase.android.schema.Migration;
-import com.getbase.android.schema.Schemas;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;

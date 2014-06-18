@@ -1,10 +1,9 @@
-package com.getbase.android.schema.tests;
+package com.getbase.android.schema;
 
-import static com.getbase.android.schema.tests.TestUtils.release;
+import static com.getbase.android.schema.TestUtils.release;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 
-import com.getbase.android.schema.Schemas;
 import com.getbase.android.schema.Schemas.Builder;
 
 import org.hamcrest.CoreMatchers;

@@ -1,11 +1,10 @@
-package com.getbase.android.schema.tests;
+package com.getbase.android.schema;
 
-import static com.getbase.android.schema.tests.TestUtils.EMPTY_MIGRATION;
-import static com.getbase.android.schema.tests.TestUtils.VALID_DOWNGRADE;
-import static com.getbase.android.schema.tests.TestUtils.release;
+import static com.getbase.android.schema.TestUtils.EMPTY_MIGRATION;
+import static com.getbase.android.schema.TestUtils.VALID_DOWNGRADE;
+import static com.getbase.android.schema.TestUtils.release;
 import static org.fest.assertions.Assertions.assertThat;
 
-import com.getbase.android.schema.Schemas;
 import com.getbase.android.schema.Schemas.AddColumn;
 import com.getbase.android.schema.Schemas.TableDefinition;
 import com.getbase.android.schema.Schemas.TableDowngrade;
