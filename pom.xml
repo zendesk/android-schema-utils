@@ -1,21 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <groupId>com.getbase.android.schema</groupId>
   <artifactId>library</artifactId>
   <version>0.5</version>
   <packaging>jar</packaging>
+
   <name>android-schema-utils library</name>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-      <!-- Plugins -->
-      <android-maven-plugin.version>3.5.0</android-maven-plugin.version>
+    <!-- Plugins -->
+    <android-maven-plugin.version>3.5.0</android-maven-plugin.version>
     <maven-compiler-plugin.version>2.3.2</maven-compiler-plugin.version>
     <api.platform>16</api.platform>
-      <!-- Dependencies -->
-      <android.version>4.1.1.4</android.version>
+    <!-- Dependencies -->
+    <android.version>4.1.1.4</android.version>
   </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.google.guava</groupId>
@@ -60,6 +63,7 @@
       <systemPath>${tools-jar}</systemPath>
     </dependency>
   </dependencies>
+
   <build>
     <plugins>
       <plugin>
