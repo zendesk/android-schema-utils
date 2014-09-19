@@ -10,7 +10,7 @@
 
   <groupId>com.getbase.android.schema</groupId>
   <artifactId>library</artifactId>
-  <version>0.6</version>
+  <version>0.7-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>android-schema-utils</name>
@@ -22,7 +22,7 @@
     <url>https://github.com/futuresimple/android-schema-utils.git</url>
     <connection>scm:git:git:@github.com:futuresimple/android-schema-utils.git</connection>
     <developerConnection>scm:git:git@github.com:futuresimple/android-schema-utils.git</developerConnection>
-    <tag>0.6</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <developers>
