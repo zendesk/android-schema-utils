@@ -2,8 +2,8 @@ Android schema utils
 ====================
 Android library for simplifying database schema and migrations management.
 
-Basic usage
------------
+Usage
+=====
 The library provides the fluent API, which allows you to define current schema:
 ```java
 @SuppressWarnings("deprecation")
@@ -98,25 +98,9 @@ In your `Schemas` definition you can include `release` checkpoints. All revision
 
 You still have to merge the section of code with `currentSchema` and you still have to make sure that both branches haven't performed the same changes, but you don't have to juggle the revision numbers and in 90% of cases you just need to decide which batch of changes should go first.
 
-Building
---------
-This is standard maven project. To build it just execute:
-```shell
-mvn clean package
-```
-in directory with pom.xml.
-
-minSdkVersion = 10
-------------------
-Android schema utils are compatible with Android 2.3 and newer.
-
-Todo
-----
-* Documentation
-* Unit tests
-
 License
--------
+=======
+
     Copyright (C) 2013 Jerzy Chalupski
 
     Licensed under the Apache License, Version 2.0 (the "License");

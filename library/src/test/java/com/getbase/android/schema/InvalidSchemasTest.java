@@ -2,9 +2,8 @@ package com.getbase.android.schema;
 
 import static com.getbase.android.schema.Migrations.auto;
 import static com.getbase.android.schema.TestUtils.EMPTY_MIGRATION;
-import static org.hamcrest.CoreMatchers.is;
+import static com.getbase.android.schema.TestUtils.is;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -50,7 +49,7 @@ public class InvalidSchemasTest {
 
   @Test
   public void shouldRejectDroppingNonExistingTable() throws Exception {
-    expectedException.expectCause(is(CoreMatchers.<IllegalStateException>instanceOf(IllegalStateException.class)));
+    expectedException.expectCause(is(IllegalStateException.class));
 
     Schemas db = Schemas.Builder
         .currentSchema(2900)
@@ -66,7 +65,7 @@ public class InvalidSchemasTest {
 
   @Test
   public void shouldRejectDroppingNonExistingColumn() throws Exception {
-    expectedException.expectCause(is(CoreMatchers.<IllegalStateException>instanceOf(IllegalStateException.class)));
+    expectedException.expectCause(is(IllegalStateException.class));
 
     Schemas db = Schemas.Builder
         .currentSchema(2900,
@@ -82,7 +81,7 @@ public class InvalidSchemasTest {
 
   @Test
   public void shouldRejectDroppingNonExistingConstraint() throws Exception {
-    expectedException.expectCause(is(CoreMatchers.<IllegalStateException>instanceOf(IllegalStateException.class)));
+    expectedException.expectCause(is(IllegalStateException.class));
 
     Schemas db = Schemas.Builder
         .currentSchema(2900,

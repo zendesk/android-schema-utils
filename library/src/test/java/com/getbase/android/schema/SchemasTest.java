@@ -1,12 +1,11 @@
 package com.getbase.android.schema;
 
+import static com.getbase.android.schema.TestUtils.is;
 import static com.getbase.android.schema.TestUtils.release;
-import static org.fest.assertions.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.is;
+import static org.fest.assertions.api.Assertions.assertThat;
 
 import com.getbase.android.schema.Schemas.Builder;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -59,7 +58,7 @@ public class SchemasTest {
 
   @Test
   public void shouldNotAllowGettingSchemaForVersionHigherThanCurrentVersion() throws Exception {
-    expectedException.expectCause(is(CoreMatchers.<IllegalStateException>instanceOf(IllegalStateException.class)));
+    expectedException.expectCause(is(IllegalStateException.class));
 
     Schemas db = Schemas.Builder
         .currentSchema(1500)

@@ -16,7 +16,7 @@
 
 package com.getbase.android.schema;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.assertThat;
 
 import com.getbase.android.schema.Schemas.AddColumn;
 import com.getbase.android.schema.Schemas.Builder;
