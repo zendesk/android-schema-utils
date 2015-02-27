@@ -31,6 +31,7 @@ androidUnitTest {
 
 dependencies {
   compile 'com.google.guava:guava:16.0'
+  compile 'org.chalup.thneed:thneed:0.7'
 
   testCompile('junit:junit:4.11')
   testCompile 'org.robolectric:robolectric:2.4'

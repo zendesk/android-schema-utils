@@ -2,8 +2,8 @@ Android schema utils
 ====================
 Android library for simplifying database schema and migrations management.
 
-Usage
-=====
+Features
+========
 The library provides the fluent API, which allows you to define current schema:
 ```java
 @SuppressWarnings("deprecation")
@@ -97,6 +97,42 @@ Most of the migrations you perform are trivial: dropping column, adding nullable
 In your `Schemas` definition you can include `release` checkpoints. All revision numbers before this checkpoint are in fact offsets from this revision. It helps a lot when you are merging two branches, which introduced changes to your schema.
 
 You still have to merge the section of code with `currentSchema` and you still have to make sure that both branches haven't performed the same changes, but you don't have to juggle the revision numbers and in 90% of cases you just need to decide which batch of changes should go first.
+
+### Automatic db index creation
+Define the relationships between your data models using [Thneed](https://github.com/chalup/thneed) and use this information to generate the proper indexes:
+```java
+for (SqliteIndex index : AutoIndexer.generateIndexes(MODEL_GRAPH)) {
+  db.execSQL(AutoIndexer.getCreateStatement(index));
+}
+```
+
+Note that this will generate the indexes for both ends of the relationships, which might not be exactly what you want. For example it will generate the index for primary keys referenced from other columns. We provide the `Predicate` factory to filter the generation results:
+```java
+FluentIterable<SQLiteIndex> indexes = FluentIterable
+    .from(AutoIndexer.generateIndexes(MODEL_GRAPH))
+    .filter(Predicates.not(isIndexOnColumn(ModelColumns.ID)))
+    .filter(Predicates.not(isIndexOnColumn(BaseColumns._ID)));
+```
+
+And if you don't want index generation, you can still use our API to get the create index statement (although, I admit, it's not a killer feature):
+```java
+AutoIndexer.getCreateStatement(new SQLiteIndex("my_table", "foobar_id"));
+```
+
+Hint: when you're automagically generating the indexes, you want to automagically clean them up as well. Use [SQLiteMaster](https://github.com/futuresimple/sqlitemaster) utility to do this:
+```java
+SQLiteMaster.dropIndexes(db);
+```
+
+Usage
+=====
+Just add the dependency to your `build.gradle`:
+
+```groovy
+dependencies {
+    compile 'com.getbase.android.schema:library:0.6'
+}
+```
 
 License
 =======
