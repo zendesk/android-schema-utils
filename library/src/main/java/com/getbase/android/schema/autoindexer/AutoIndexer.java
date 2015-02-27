@@ -40,21 +40,21 @@ public final class AutoIndexer {
 
   private static final Joiner COLUMN_JOINER = Joiner.on(",");
 
-  public static String getCreateStatement(SqliteIndex index) {
+  public static String getCreateStatement(SQLiteIndex index) {
     return "CREATE INDEX " + index.getName() + " ON " + index.mTable + "(" + COLUMN_JOINER.join(index.mColumns) + ")";
   }
 
-  public static Predicate<SqliteIndex> isIndexOnColumn(final String columnName) {
-    return new Predicate<SqliteIndex>() {
+  public static Predicate<SQLiteIndex> isIndexOnColumn(final String columnName) {
+    return new Predicate<SQLiteIndex>() {
       @Override
-      public boolean apply(SqliteIndex index) {
+      public boolean apply(SQLiteIndex index) {
         return index.mColumns.length == 1 && index.mColumns[0].equalsIgnoreCase(columnName);
       }
     };
   }
 
-  public static Set<SqliteIndex> generateIndexes(ModelGraph<? extends DatabaseModel> modelGraph) {
-    final Set<SqliteIndex> indexes = Sets.newHashSet();
+  public static Set<SQLiteIndex> generateIndexes(ModelGraph<? extends DatabaseModel> modelGraph) {
+    final Set<SQLiteIndex> indexes = Sets.newHashSet();
 
     modelGraph.accept(new RelationshipVisitor<DatabaseModel>() {
       @Override
@@ -62,8 +62,8 @@ public final class AutoIndexer {
         DatabaseModel model = relationship.mModel;
         DatabaseModel referencedModel = relationship.mReferencedModel;
 
-        indexes.add(new SqliteIndex(model.getTableName(), relationship.mLinkedByColumn));
-        indexes.add(new SqliteIndex(referencedModel.getTableName(), relationship.mReferencedModelIdColumn));
+        indexes.add(new SQLiteIndex(model.getTableName(), relationship.mLinkedByColumn));
+        indexes.add(new SQLiteIndex(referencedModel.getTableName(), relationship.mReferencedModelIdColumn));
       }
 
       @Override
@@ -71,16 +71,16 @@ public final class AutoIndexer {
         DatabaseModel model = relationship.mModel;
         DatabaseModel linkedModel = relationship.mLinkedModel;
 
-        indexes.add(new SqliteIndex(linkedModel.getTableName(), relationship.mLinkedByColumn));
-        indexes.add(new SqliteIndex(model.getTableName(), relationship.mParentModelIdColumn));
+        indexes.add(new SQLiteIndex(linkedModel.getTableName(), relationship.mLinkedByColumn));
+        indexes.add(new SQLiteIndex(model.getTableName(), relationship.mParentModelIdColumn));
       }
 
       @Override
       public void visit(RecursiveModelRelationship<? extends DatabaseModel> relationship) {
         DatabaseModel model = relationship.mModel;
 
-        indexes.add(new SqliteIndex(model.getTableName(), relationship.mModelIdColumn));
-        indexes.add(new SqliteIndex(model.getTableName(), relationship.mGroupByColumn));
+        indexes.add(new SQLiteIndex(model.getTableName(), relationship.mModelIdColumn));
+        indexes.add(new SQLiteIndex(model.getTableName(), relationship.mGroupByColumn));
       }
 
       @Override
@@ -91,10 +91,10 @@ public final class AutoIndexer {
       @Override
       public void visit(PolymorphicRelationship<? extends DatabaseModel> relationship) {
         DatabaseModel model = relationship.mModel;
-        indexes.add(new SqliteIndex(model.getTableName(), relationship.mTypeColumnName, relationship.mIdColumnName));
+        indexes.add(new SQLiteIndex(model.getTableName(), relationship.mTypeColumnName, relationship.mIdColumnName));
 
         for (DatabaseModel DatabaseModel : relationship.mPolymorphicModels.values()) {
-          indexes.add(new SqliteIndex(DatabaseModel.getTableName(), relationship.mPolymorphicModelIdColumn));
+          indexes.add(new SQLiteIndex(DatabaseModel.getTableName(), relationship.mPolymorphicModelIdColumn));
         }
       }
     });

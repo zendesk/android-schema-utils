@@ -17,7 +17,7 @@
 package com.getbase.android.schema.autoindexer.tests;
 
 import com.getbase.android.schema.autoindexer.AutoIndexer;
-import com.getbase.android.schema.autoindexer.SqliteIndex;
+import com.getbase.android.schema.autoindexer.SQLiteIndex;
 
 import org.chalup.thneed.ModelGraph;
 import org.chalup.thneed.models.DatabaseModel;
@@ -60,11 +60,11 @@ public class AutoIndexerTest {
         .the(CONTACT).references(USER).by("user_id")
         .build();
 
-    Set<SqliteIndex> indexes = AutoIndexer.generateIndexes(modelGraph);
+    Set<SQLiteIndex> indexes = AutoIndexer.generateIndexes(modelGraph);
     Assertions.assertThat(indexes).contains(
-        new SqliteIndex("users", "id"),
-        new SqliteIndex("deals", "user_id"),
-        new SqliteIndex("contacts", "user_id")
+        new SQLiteIndex("users", "id"),
+        new SQLiteIndex("deals", "user_id"),
+        new SQLiteIndex("contacts", "user_id")
     );
   }
 
@@ -77,11 +77,11 @@ public class AutoIndexerTest {
         .the(CONTACT).references("id").in(USER).by("user_id")
         .build();
 
-    Set<SqliteIndex> indexes = AutoIndexer.generateIndexes(modelGraph);
+    Set<SQLiteIndex> indexes = AutoIndexer.generateIndexes(modelGraph);
     Assertions.assertThat(indexes).contains(
-        new SqliteIndex("users", "id"),
-        new SqliteIndex("deals", "user_id"),
-        new SqliteIndex("contacts", "user_id")
+        new SQLiteIndex("users", "id"),
+        new SQLiteIndex("deals", "user_id"),
+        new SQLiteIndex("contacts", "user_id")
     );
   }
 }

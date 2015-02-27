@@ -101,7 +101,7 @@ You still have to merge the section of code with `currentSchema` and you still h
 ### Automatic db index creation
 Define the relationships between your data models using [Thneed](https://github.com/chalup/thneed) and use this information to generate the proper indexes:
 ```java
-for (SqliteIndex index : AutoIndexer.generateIndexes(MODEL_GRAPH)) {
+for (SQLiteIndex index : AutoIndexer.generateIndexes(MODEL_GRAPH)) {
   db.execSQL(AutoIndexer.getCreateStatement(index));
 }
 ```

@@ -21,13 +21,13 @@ import com.google.common.base.Objects;
 
 import java.util.Arrays;
 
-public class SqliteIndex {
+public class SQLiteIndex {
   public final String mTable;
   public final String[] mColumns;
 
   private static final Joiner INDEX_NAME_JOINER = Joiner.on("_");
 
-  public SqliteIndex(String table, String... columns) {
+  public SQLiteIndex(String table, String... columns) {
     mTable = table;
     mColumns = columns;
   }
@@ -37,7 +37,7 @@ public class SqliteIndex {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
 
-    SqliteIndex that = (SqliteIndex) o;
+    SQLiteIndex that = (SQLiteIndex) o;
 
     return Objects.equal(mTable, that.mTable) &&
         Arrays.equals(mColumns, that.mColumns);
