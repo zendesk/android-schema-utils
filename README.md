@@ -163,7 +163,7 @@ Just add the dependency to your `build.gradle`:
 
 ```groovy
 dependencies {
-    compile 'com.getbase.android.schema:library:0.7'
+    compile 'com.getbase.android.schema:library:0.8'
 }
 ```
 
