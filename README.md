@@ -119,10 +119,43 @@ And if you don't want index generation, you can still use our API to get the cre
 AutoIndexer.getCreateStatement(new SQLiteIndex("my_table", "foobar_id"));
 ```
 
-Hint: when you're automagically generating the indexes, you want to automagically clean them up as well. Use [SQLiteMaster](https://github.com/futuresimple/sqlitemaster) utility to do this:
+Hint: when you're automagically generating the indexes, you want to automagically clean them up as well. Use `SQLiteMaster` to do this:
 ```java
 SQLiteMaster.dropIndexes(db);
 ```
+
+### SQLiteMaster
+Set of utils for getting existing db schema information from sqlite_master table.
+
+You can use the schema information in your SQLiteOpenHelper's `onCreate` and `onUpgrade` to remove some boilerplate code. Compare:
+
+```java
+db.execSQL("DROP TRIGGER IF EXISTS trigger_a");
+db.execSQL("DROP TRIGGER IF EXISTS trigger_b");
+db.execSQL("DROP TRIGGER IF EXISTS trigger_c");
+// ...
+db.execSQL("DROP TRIGGER IF EXISTS trigger_z");
+```
+
+With:
+```java
+SQLiteMaster.dropTriggers(db);
+```
+
+You can perform similar operations with views, tables and indexes, or you can access the full schema information using `getSQLiteSchemaParts(SQLiteDatabase db, SQLiteSchemaPartType partType)` or `getSQLiteSchemaParts(SQLiteDatabase db)`, which return the list of `SQLiteSchemaPart` objects:
+
+```java
+public class SQLiteSchemaPart {
+  public final String name;
+  public final String sql;
+  public final String type;
+}
+```
+
+What you do with that information is completely up to you.
+
+#### Is it safe to use?
+Our tests indicate that there are no issues whatsoever on API level 8+ (Android 2.2). We haven't tested earlier versions, so consider yourself warned (and please let us know if you confirm it works on lower API levels!).
 
 Usage
 =====
