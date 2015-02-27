@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+Version 0.7 *(2015-02-27)*
+----------------------------
+
+ * Migrate to gradle
+ * Incorporate sqlitemaster library
+ * Incorporate autoindexer library
+
 Version 0.6 *(2014-09-19)*
 ----------------------------
 
