@@ -18,6 +18,7 @@ package com.getbase.android.schema;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
@@ -792,7 +793,7 @@ public class Schemas {
   private static final Migration[] AUTO_MIGRATIONS = new Migration[] { AUTO_MIGRATION };
 
   Migration[] to(int revision) {
-    return Objects.firstNonNull(
+    return MoreObjects.firstNonNull(
         mMigrations.get(revision),
         AUTO_MIGRATIONS
     );
