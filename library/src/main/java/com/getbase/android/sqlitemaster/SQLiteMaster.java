@@ -39,9 +39,9 @@ public final class SQLiteMaster {
   }
 
   private interface SqliteMasterColumns {
-    public static final String NAME = "name";
-    public static final String SQL = "sql";
-    public static final String TYPE = "type";
+    String NAME = "name";
+    String SQL = "sql";
+    String TYPE = "type";
   }
 
   private static final String SQLITE_MASTER_TABLE = "sqlite_master";
