@@ -2,7 +2,7 @@ package com.getbase.android.schema;
 
 import static com.getbase.android.schema.TestUtils.is;
 import static com.getbase.android.schema.TestUtils.release;
-import static org.fest.assertions.api.Assertions.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 
 import com.getbase.android.schema.Schemas.Builder;
 

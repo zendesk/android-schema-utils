@@ -3,7 +3,7 @@ package com.getbase.android.schema;
 import static com.getbase.android.schema.TestUtils.EMPTY_MIGRATION;
 import static com.getbase.android.schema.TestUtils.VALID_DOWNGRADE;
 import static com.getbase.android.schema.TestUtils.release;
-import static org.fest.assertions.api.Assertions.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 
 import com.getbase.android.schema.Schemas.AddColumn;
 import com.getbase.android.schema.Schemas.TableDefinition;

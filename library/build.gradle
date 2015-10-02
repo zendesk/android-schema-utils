@@ -24,7 +24,7 @@ dependencies {
 
   testCompile('junit:junit:4.11')
   testCompile 'org.robolectric:robolectric:2.4'
-  testCompile 'org.easytesting:fest-assert-core:2.0M10'
+  testCompile 'com.google.truth:truth:0.27'
   testCompile 'org.mockito:mockito-all:1.9.5'
 
   compile 'com.android.support:support-annotations:22.2.1'

@@ -16,7 +16,7 @@
 
 package com.getbase.android.schema;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 
 import com.getbase.android.schema.Schemas.AddColumn;
 import com.getbase.android.schema.Schemas.Builder;
@@ -70,11 +70,11 @@ public class MigrationsTest {
   @Test
   public void shouldPerformSimpleAutoMigration() throws Exception {
     SQLiteDatabase v1 = getDb(SCHEMAS, 1);
-    assertThat(MigrationsHelper.getColumns(v1, "Contacts")).containsOnly("id");
+    assertThat(MigrationsHelper.getColumns(v1, "Contacts")).containsExactly("id");
     v1.close();
 
     SQLiteDatabase v2 = getDb(SCHEMAS, 2);
-    assertThat(MigrationsHelper.getColumns(v2, "Contacts")).containsOnly("id", "created_at");
+    assertThat(MigrationsHelper.getColumns(v2, "Contacts")).containsExactly("id", "created_at");
     v2.close();
   }
 

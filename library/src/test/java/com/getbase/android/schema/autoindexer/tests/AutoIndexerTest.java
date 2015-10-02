@@ -16,12 +16,13 @@
 
 package com.getbase.android.schema.autoindexer.tests;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.getbase.android.schema.autoindexer.AutoIndexer;
 import com.getbase.android.schema.autoindexer.SQLiteIndex;
 
 import org.chalup.thneed.ModelGraph;
 import org.chalup.thneed.models.DatabaseModel;
-import org.fest.assertions.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -61,7 +62,7 @@ public class AutoIndexerTest {
         .build();
 
     Set<SQLiteIndex> indexes = AutoIndexer.generateIndexes(modelGraph);
-    Assertions.assertThat(indexes).contains(
+    assertThat(indexes).containsExactly(
         new SQLiteIndex("users", "id"),
         new SQLiteIndex("deals", "user_id"),
         new SQLiteIndex("contacts", "user_id")
@@ -78,7 +79,7 @@ public class AutoIndexerTest {
         .build();
 
     Set<SQLiteIndex> indexes = AutoIndexer.generateIndexes(modelGraph);
-    Assertions.assertThat(indexes).contains(
+    assertThat(indexes).containsExactly(
         new SQLiteIndex("users", "id"),
         new SQLiteIndex("deals", "user_id"),
         new SQLiteIndex("contacts", "user_id")
