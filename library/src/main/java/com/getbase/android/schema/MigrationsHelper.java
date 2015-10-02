@@ -88,7 +88,7 @@ public class MigrationsHelper {
     }
 
     public static class Builder {
-      private Map<String, String> mMappings = new HashMap<String, String>();
+      private Map<String, String> mMappings = new HashMap<>();
       private String mCreateTableStatement;
       private String mTable;
 

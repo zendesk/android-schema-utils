@@ -81,7 +81,7 @@ public final class SQLiteMaster {
   }
 
   private static List<SQLiteSchemaPart> getSQLiteSchemaParts(Cursor c) {
-    List<SQLiteSchemaPart> result = new ArrayList<SQLiteSchemaPart>();
+    List<SQLiteSchemaPart> result = new ArrayList<>();
     if (c != null) {
       try {
         if (c.moveToFirst()) {
