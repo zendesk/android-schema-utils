@@ -40,6 +40,7 @@ import com.google.common.collect.Sets.SetView;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.util.Arrays;
@@ -68,7 +69,7 @@ public class Schemas {
       CacheBuilder.newBuilder().build(
           new CacheLoader<Integer, ImmutableMap<String, ImmutableList<? extends TableDefinitionOperation>>>() {
             @Override
-            public ImmutableMap<String, ImmutableList<? extends TableDefinitionOperation>> load(Integer key) throws Exception {
+            public ImmutableMap<String, ImmutableList<? extends TableDefinitionOperation>> load(@NonNull Integer key) throws Exception {
               Integer lastMergedRevision = Collections.min(mRevisions.asMap().keySet());
               Log.d(TAG, "Building migration to " + key + " (min schema prepared: " + lastMergedRevision + ")");
               Preconditions.checkState(lastMergedRevision > key, "Trying to retrieve version %s, which is higher than current schema version", key);
