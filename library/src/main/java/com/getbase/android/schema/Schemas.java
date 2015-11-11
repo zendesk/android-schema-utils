@@ -536,7 +536,7 @@ public class Schemas {
 
   public static class TableDefinition extends SchemaPart<TableDefinitionOperation> {
     public TableDefinition(String tableName, TableDefinitionOperation... operations) {
-      super(tableName, operations);
+      this(tableName, ImmutableList.copyOf(operations));
     }
 
     public TableDefinition(String tableName, ImmutableList<TableDefinitionOperation> operations) {
@@ -550,7 +550,7 @@ public class Schemas {
 
   public static class TableDowngrade extends SchemaPart<TableDowngradeOperation> {
     public TableDowngrade(String tableName, TableDowngradeOperation... operations) {
-      super(tableName, operations);
+      this(tableName, ImmutableList.copyOf(operations));
     }
 
     public TableDowngrade(String tableName, ImmutableList<? extends TableDowngradeOperation> operations) {
@@ -561,10 +561,6 @@ public class Schemas {
   private static class SchemaPart<T extends TableOperation> {
     protected final String mTableName;
     protected final ImmutableList<? extends T> mOperations;
-
-    private SchemaPart(String tableName, T... operations) {
-      this(tableName, ImmutableList.copyOf(operations));
-    }
 
     private SchemaPart(String tableName, ImmutableList<? extends T> operations) {
       validateTableOperations(tableName, operations);
